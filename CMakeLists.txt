@@ -1,8 +1,10 @@
-﻿cmake_minimum_required(VERSION 3.0)
+﻿
+cmake_minimum_required(VERSION 3.7.2)
 
 project (ethereal)
 
-set(CMAKE_CXX_STANDARD 14)
+
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -24,6 +26,11 @@ else()
 	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 add_definitions(-DNOMINMAX)
+
+# only show first error please.
+# add_definitions(
+#     -Wfatal-errors
+#     )
 
 #enable_sanitizers("custom")
 

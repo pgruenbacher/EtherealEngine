@@ -1,7 +1,6 @@
 #pragma once
 
 #include "filesystem_includes.h"
-
 namespace fs
 {
 //-----------------------------------------------------------------------------

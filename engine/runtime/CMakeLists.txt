@@ -6,3 +6,7 @@ target_link_libraries(runtime PUBLIC core)
 target_link_libraries(runtime PUBLIC mml-window)
 
 target_include_directories (runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+# find_package(EnTT REQUIRED)
+target_include_directories(runtime INTERFACE ${EnTT_SOURCE_DIR}/src)
+

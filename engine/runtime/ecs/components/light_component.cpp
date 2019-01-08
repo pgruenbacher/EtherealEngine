@@ -1,5 +1,8 @@
 #include "light_component.h"
 
+
+#include "../ent.h"
+
 int light_component::compute_projected_sphere_rect(irect32_t& rect, const math::vec3& light_position,
 												   const math::vec3& light_direction,
 												   const math::transform& view, const math::transform& proj)

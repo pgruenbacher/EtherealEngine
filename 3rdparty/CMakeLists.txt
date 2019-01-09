@@ -9,4 +9,7 @@ add_subdirectory_ex(imgui)
 add_subdirectory_ex(glm)
 add_subdirectory_ex(openal)
 add_subdirectory_ex(stb)
+
+# don't build entt testing
+set(BUILD_TESTING OFF)
 add_subdirectory_ex(entt)

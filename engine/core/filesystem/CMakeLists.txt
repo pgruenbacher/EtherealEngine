@@ -10,3 +10,5 @@ set_target_properties(filesystem PROPERTIES
 
 include(target_warning_support)
 set_warning_level(filesystem high)
+
+target_link_libraries(filesystem PUBLIC stdc++fs)

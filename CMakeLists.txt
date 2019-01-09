@@ -30,7 +30,6 @@ add_definitions(-DNOMINMAX)
 #     )
 
 #enable_sanitizers("custom")
-
 detect_platform()
 print_info()
 set_output_paths()
@@ -40,3 +39,5 @@ set_project_custom_defines()
 
 add_subdirectory_ex(engine)
 add_subdirectory_ex(editor)
+# enable_testing()
+add_subdirectory_ex(test)

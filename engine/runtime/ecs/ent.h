@@ -3,6 +3,7 @@
 #include <core/reflection/registration.h>
 #include <core/common/nonstd/type_index.hpp>
 
+
 namespace ent {
 
   using EntityType = entt::registry<>::entity_type;

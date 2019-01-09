@@ -38,6 +38,10 @@ public:
 
 	bool is_touched() { return true; }
 
+	reflection_probe_component() {};
+	reflection_probe_component(const reflection_probe_component& p) {};
+	void operator=(const reflection_probe_component& p) {};
+
 private:
 	//-------------------------------------------------------------------------
 	// Private Member Variables.

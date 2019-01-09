@@ -104,8 +104,8 @@ void default_scene()
 		probe.method = reflect_method::environment;
 		probe.type = probe_type::sphere;
 		probe.sphere_data.range = 1000.0f;
-		auto reflect_comp = object.assign<reflection_probe_component>().lock();
-		reflect_comp->set_probe(probe);
+		// auto reflect_comp = object.assign<reflection_probe_component>().lock();
+		// reflect_comp->set_probe(probe);
 	}
 	{
 		auto object = ecs.create();
@@ -116,8 +116,8 @@ void default_scene()
 		reflection_probe probe;
 		probe.method = reflect_method::static_only;
 		probe.type = probe_type::box;
-		auto reflect_comp = object.assign<reflection_probe_component>().lock();
-		reflect_comp->set_probe(probe);
+		// auto reflect_comp = object.assign<reflection_probe_component>().lock();
+		// reflect_comp->set_probe(probe);
 	}
 	{
 		auto object = ecs.create();

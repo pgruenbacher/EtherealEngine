@@ -10,6 +10,7 @@
 #include "../ecs/systems/deferred_rendering.h"
 #include "../ecs/systems/reflection_probe_system.h"
 #include "../ecs/systems/scene_graph.h"
+#include "../ecs/ent.h"
 #include "../input/input.h"
 #include "../rendering/render_window.h"
 #include "../rendering/renderer.h"
@@ -65,6 +66,7 @@ void app::start(cmd_line::parser& parser)
 	core::add_subsystem<reflection_probe_system>();
 	core::add_subsystem<deferred_rendering>();
 	core::add_subsystem<audio_system>();
+	core::add_subsystem<ent::SpatialSystem>();
 }
 
 void app::stop()

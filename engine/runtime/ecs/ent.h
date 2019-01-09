@@ -1,8 +1,13 @@
 #include <entt/entt.hpp>
 #include <core/serialization/serialization.h>
 #include <core/reflection/registration.h>
+#include <core/common/nonstd/type_index.hpp>
 
 namespace ent {
+
+  using EntityType = entt::registry<>::entity_type;
+  using Registry = entt::registry<>;
+  using SpatialSystem = Registry;
 
   template <typename C>
   using chandle = std::weak_ptr<C>;
@@ -20,12 +25,12 @@ namespace ent {
   class component_impl : public component
   {
   private:
+
+  public:
     rtti::type_index_sequential_t::index_t runtime_id() const override
     {
       return static_id();
     }
-
-  public:
     component_impl() = default;
     component_impl(component_impl& rhs) = delete;
     component_impl& operator=(component_impl& rhs) = delete;

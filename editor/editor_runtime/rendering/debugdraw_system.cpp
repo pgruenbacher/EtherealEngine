@@ -198,41 +198,41 @@ void debugdraw_system::frame_render(delta_t)
 		}
 	}
 
-	if(selected_entity.has_component<reflection_probe_component>())
-	{
-		const auto probe_comp = selected_entity.get_component<reflection_probe_component>();
-		const auto probe_comp_ptr = probe_comp.lock().get();
-		const auto& probe = probe_comp_ptr->get_probe();
-		if(probe.type == probe_type::box)
-		{
-			dd.encoder.push();
-			dd.encoder.setColor(0xff00ff00);
-			dd.encoder.setWireframe(true);
-			dd.encoder.pushTransform(&world_transform);
-			Aabb aabb;
-			aabb.m_min.x = -probe.box_data.extents.x;
-			aabb.m_min.y = -probe.box_data.extents.y;
-			aabb.m_min.z = -probe.box_data.extents.z;
-			aabb.m_max.x = probe.box_data.extents.x;
-			aabb.m_max.y = probe.box_data.extents.y;
-			aabb.m_max.z = probe.box_data.extents.z;
-			dd.encoder.draw(aabb);
-			dd.encoder.popTransform();
-			dd.encoder.pop();
-		}
-		else
-		{
-			auto radius = probe.sphere_data.range;
-			dd.encoder.push();
-			dd.encoder.setColor(0xff00ff00);
-			dd.encoder.setWireframe(true);
-			math::vec3 center = transform_comp_ptr->get_position();
-			dd.encoder.drawCircle(Axis::X, center.x, center.y, center.z, radius);
-			dd.encoder.drawCircle(Axis::Y, center.x, center.y, center.z, radius);
-			dd.encoder.drawCircle(Axis::Z, center.x, center.y, center.z, radius);
-			dd.encoder.pop();
-		}
-	}
+	// if(selected_entity.has_component<reflection_probe_component>())
+	// {
+	// 	const auto probe_comp = selected_entity.get_component<reflection_probe_component>();
+	// 	const auto probe_comp_ptr = probe_comp.lock().get();
+	// 	const auto& probe = probe_comp_ptr->get_probe();
+	// 	if(probe.type == probe_type::box)
+	// 	{
+	// 		dd.encoder.push();
+	// 		dd.encoder.setColor(0xff00ff00);
+	// 		dd.encoder.setWireframe(true);
+	// 		dd.encoder.pushTransform(&world_transform);
+	// 		Aabb aabb;
+	// 		aabb.m_min.x = -probe.box_data.extents.x;
+	// 		aabb.m_min.y = -probe.box_data.extents.y;
+	// 		aabb.m_min.z = -probe.box_data.extents.z;
+	// 		aabb.m_max.x = probe.box_data.extents.x;
+	// 		aabb.m_max.y = probe.box_data.extents.y;
+	// 		aabb.m_max.z = probe.box_data.extents.z;
+	// 		dd.encoder.draw(aabb);
+	// 		dd.encoder.popTransform();
+	// 		dd.encoder.pop();
+	// 	}
+	// 	else
+	// 	{
+	// 		auto radius = probe.sphere_data.range;
+	// 		dd.encoder.push();
+	// 		dd.encoder.setColor(0xff00ff00);
+	// 		dd.encoder.setWireframe(true);
+	// 		math::vec3 center = transform_comp_ptr->get_position();
+	// 		dd.encoder.drawCircle(Axis::X, center.x, center.y, center.z, radius);
+	// 		dd.encoder.drawCircle(Axis::Y, center.x, center.y, center.z, radius);
+	// 		dd.encoder.drawCircle(Axis::Z, center.x, center.y, center.z, radius);
+	// 		dd.encoder.pop();
+	// 	}
+	// }
 
 	if(selected_entity.has_component<model_component>())
 	{

@@ -57,7 +57,5 @@ void reflection_probe_component::set_probe(const reflection_probe& probe)
 	if(probe == probe_)
 		return;
 
-	touch();
-
 	probe_ = probe;
 }

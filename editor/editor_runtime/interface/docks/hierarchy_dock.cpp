@@ -242,8 +242,8 @@ static context_action check_context_menu(runtime::entity entity)
 							reflection_probe probe;
 							probe.method = reflect_method::static_only;
 							probe.type = type;
-							auto reflection_comp = object.assign<reflection_probe_component>().lock();
-							reflection_comp->set_probe(probe);
+							// auto reflection_comp = object.assign<reflection_probe_component>().lock();
+							// reflection_comp->set_probe(probe);
 							es.select(object);
 						}
 					}

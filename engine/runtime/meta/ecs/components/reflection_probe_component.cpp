@@ -12,7 +12,7 @@ REFLECT(reflection_probe_component)
 
 SAVE(reflection_probe_component)
 {
-	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 	try_save(ar, cereal::make_nvp("probe", obj.probe_));
 }
 SAVE_INSTANTIATE(reflection_probe_component, cereal::oarchive_associative_t);
@@ -20,7 +20,7 @@ SAVE_INSTANTIATE(reflection_probe_component, cereal::oarchive_binary_t);
 
 LOAD(reflection_probe_component)
 {
-	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 	try_load(ar, cereal::make_nvp("probe", obj.probe_));
 }
 LOAD_INSTANTIATE(reflection_probe_component, cereal::iarchive_associative_t);

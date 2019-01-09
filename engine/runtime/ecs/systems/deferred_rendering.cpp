@@ -234,53 +234,53 @@ void deferred_rendering::frame_render(std::chrono::duration<float> dt)
 void deferred_rendering::build_reflections_pass(entity_component_system& ecs, std::chrono::duration<float> dt)
 {
 	auto dirty_models = gather_visible_models(ecs, nullptr, true, true, true);
-	ecs.for_each<transform_component, reflection_probe_component>(
-		[this, &ecs, dt, &dirty_models](entity ce, transform_component& transform_comp,
-										reflection_probe_component& reflection_probe_comp) {
-			const auto& world_tranform = transform_comp.get_transform();
-			const auto& probe = reflection_probe_comp.get_probe();
+	// ecs.for_each<transform_component, reflection_probe_component>(
+	// 	[this, &ecs, dt, &dirty_models](entity ce, transform_component& transform_comp,
+	// 									reflection_probe_component& reflection_probe_comp) {
+	// 		const auto& world_tranform = transform_comp.get_transform();
+	// 		const auto& probe = reflection_probe_comp.get_probe();
 
-			auto cubemap_fbo = reflection_probe_comp.get_cubemap_fbo();
-			bool should_rebuild = true;
+	// 		auto cubemap_fbo = reflection_probe_comp.get_cubemap_fbo();
+	// 		bool should_rebuild = true;
 
-			if(!transform_comp.is_touched() && !reflection_probe_comp.is_touched())
-			{
-				// If reflections shouldn't be rebuilt - continue.
-				should_rebuild = should_rebuild_reflections(dirty_models, probe);
-			}
+	// 		if(!transform_comp.is_touched() && !reflection_probe_comp.is_touched())
+	// 		{
+	// 			// If reflections shouldn't be rebuilt - continue.
+	// 			should_rebuild = should_rebuild_reflections(dirty_models, probe);
+	// 		}
 
-			if(!should_rebuild)
-				return;
+	// 		if(!should_rebuild)
+	// 			return;
 
-			// iterate trough each cube face
-			for(std::uint32_t i = 0; i < 6; ++i)
-			{
-				auto camera = camera::get_face_camera(i, world_tranform);
-				camera.set_far_clip(reflection_probe_comp.get_probe().box_data.extents.r);
-				auto& render_view = reflection_probe_comp.get_render_view(i);
-				camera.set_viewport_size(usize32_t(cubemap_fbo->get_size()));
-				auto& camera_lods = lod_data_[ce];
-				visibility_set_models_t visibility_set;
+	// 		// iterate trough each cube face
+	// 		for(std::uint32_t i = 0; i < 6; ++i)
+	// 		{
+	// 			auto camera = camera::get_face_camera(i, world_tranform);
+	// 			camera.set_far_clip(reflection_probe_comp.get_probe().box_data.extents.r);
+	// 			auto& render_view = reflection_probe_comp.get_render_view(i);
+	// 			camera.set_viewport_size(usize32_t(cubemap_fbo->get_size()));
+	// 			auto& camera_lods = lod_data_[ce];
+	// 			visibility_set_models_t visibility_set;
 
-				if(probe.method != reflect_method::environment)
-					visibility_set = gather_visible_models(ecs, &camera, !should_rebuild, true, true);
+	// 			if(probe.method != reflect_method::environment)
+	// 				visibility_set = gather_visible_models(ecs, &camera, !should_rebuild, true, true);
 
-				std::shared_ptr<gfx::frame_buffer> output = nullptr;
-				output = g_buffer_pass(output, camera, render_view, visibility_set, camera_lods, dt);
-				output = lighting_pass(output, camera, render_view, ecs, dt);
-				output = atmospherics_pass(output, camera, render_view, ecs, dt);
-				output = tonemapping_pass(output, camera, render_view);
+	// 			std::shared_ptr<gfx::frame_buffer> output = nullptr;
+	// 			output = g_buffer_pass(output, camera, render_view, visibility_set, camera_lods, dt);
+	// 			output = lighting_pass(output, camera, render_view, ecs, dt);
+	// 			output = atmospherics_pass(output, camera, render_view, ecs, dt);
+	// 			output = tonemapping_pass(output, camera, render_view);
 
-				gfx::render_pass pass("cubemap_fill");
-				pass.touch();
-				gfx::blit(pass.id, cubemap_fbo->get_texture()->native_handle(), 0, 0, 0, std::uint16_t(i),
-						  output->get_texture()->native_handle());
-			}
+	// 			gfx::render_pass pass("cubemap_fill");
+	// 			pass.touch();
+	// 			gfx::blit(pass.id, cubemap_fbo->get_texture()->native_handle(), 0, 0, 0, std::uint16_t(i),
+	// 					  output->get_texture()->native_handle());
+	// 		}
 
-			gfx::render_pass pass("cubemap_generate_mips");
-			pass.bind(cubemap_fbo.get());
-			pass.touch();
-		});
+	// 		gfx::render_pass pass("cubemap_generate_mips");
+	// 		pass.bind(cubemap_fbo.get());
+	// 		pass.touch();
+	// 	});
 }
 
 void deferred_rendering::build_shadows_pass(entity_component_system& ecs, std::chrono::duration<float> dt)
@@ -545,75 +545,75 @@ deferred_rendering::reflection_probe_pass(std::shared_ptr<gfx::frame_buffer> inp
 	pass.bind(r_buffer_fbo.get());
 	pass.set_view_proj(view, proj);
 	pass.clear(BGFX_CLEAR_COLOR, 0, 0.0f, 0);
-	ecs.for_each<transform_component, reflection_probe_component>(
-		[this, &camera, &pass, &buffer_size, &view, &proj, g_buffer_fbo](
-			entity e, transform_component& transform_comp_ref, reflection_probe_component& probe_comp_ref) {
-			const auto& probe = probe_comp_ref.get_probe();
-			const auto& world_transform = transform_comp_ref.get_transform();
-			const auto& probe_position = world_transform.get_position();
+	// ecs.for_each<transform_component, reflection_probe_component>(
+	// 	[this, &camera, &pass, &buffer_size, &view, &proj, g_buffer_fbo](
+	// 		entity e, transform_component& transform_comp_ref, reflection_probe_component& probe_comp_ref) {
+	// 		const auto& probe = probe_comp_ref.get_probe();
+	// 		const auto& world_transform = transform_comp_ref.get_transform();
+	// 		const auto& probe_position = world_transform.get_position();
 
-			irect32_t rect(0, 0, irect32_t::value_type(buffer_size.width),
-						   irect32_t::value_type(buffer_size.height));
-			if(probe_comp_ref.compute_projected_sphere_rect(rect, probe_position, view, proj) == 0)
-				return;
+	// 		irect32_t rect(0, 0, irect32_t::value_type(buffer_size.width),
+	// 					   irect32_t::value_type(buffer_size.height));
+	// 		if(probe_comp_ref.compute_projected_sphere_rect(rect, probe_position, view, proj) == 0)
+	// 			return;
 
-			const auto cubemap = probe_comp_ref.get_cubemap();
+	// 		const auto cubemap = probe_comp_ref.get_cubemap();
 
-			gpu_program* program = nullptr;
-			float influence_radius = 0.0f;
-			if(probe.type == probe_type::sphere && sphere_ref_probe_program_)
-			{
-				program = sphere_ref_probe_program_.get();
-				program->begin();
-				influence_radius = probe.sphere_data.range;
-			}
+	// 		gpu_program* program = nullptr;
+	// 		float influence_radius = 0.0f;
+	// 		if(probe.type == probe_type::sphere && sphere_ref_probe_program_)
+	// 		{
+	// 			program = sphere_ref_probe_program_.get();
+	// 			program->begin();
+	// 			influence_radius = probe.sphere_data.range;
+	// 		}
 
-			if(probe.type == probe_type::box && box_ref_probe_program_)
-			{
-				math::transform t;
-				t.set_scale(probe.box_data.extents);
-				t = world_transform * t;
-				auto u_inv_world = math::inverse(t).get_matrix();
-				float data2[4] = {probe.box_data.extents.x, probe.box_data.extents.y,
-								  probe.box_data.extents.z, probe.box_data.transition_distance};
+	// 		if(probe.type == probe_type::box && box_ref_probe_program_)
+	// 		{
+	// 			math::transform t;
+	// 			t.set_scale(probe.box_data.extents);
+	// 			t = world_transform * t;
+	// 			auto u_inv_world = math::inverse(t).get_matrix();
+	// 			float data2[4] = {probe.box_data.extents.x, probe.box_data.extents.y,
+	// 							  probe.box_data.extents.z, probe.box_data.transition_distance};
 
-				program = box_ref_probe_program_.get();
-				program->begin();
-				program->set_uniform("u_inv_world", math::value_ptr(u_inv_world));
-				program->set_uniform("u_data2", data2);
+	// 			program = box_ref_probe_program_.get();
+	// 			program->begin();
+	// 			program->set_uniform("u_inv_world", math::value_ptr(u_inv_world));
+	// 			program->set_uniform("u_data2", data2);
 
-				influence_radius = math::length(t.get_scale() + probe.box_data.transition_distance);
-			}
+	// 			influence_radius = math::length(t.get_scale() + probe.box_data.transition_distance);
+	// 		}
 
-			if(program)
-			{
-				float mips = cubemap ? float(cubemap->info.numMips) : 1.0f;
-				float data0[4] = {
-					probe_position.x,
-					probe_position.y,
-					probe_position.z,
-					influence_radius,
-				};
+	// 		if(program)
+	// 		{
+	// 			float mips = cubemap ? float(cubemap->info.numMips) : 1.0f;
+	// 			float data0[4] = {
+	// 				probe_position.x,
+	// 				probe_position.y,
+	// 				probe_position.z,
+	// 				influence_radius,
+	// 			};
 
-				float data1[4] = {mips, 0.0f, 0.0f, 0.0f};
+	// 			float data1[4] = {mips, 0.0f, 0.0f, 0.0f};
 
-				program->set_uniform("u_data0", data0);
-				program->set_uniform("u_data1", data1);
+	// 			program->set_uniform("u_data0", data0);
+	// 			program->set_uniform("u_data1", data1);
 
-				program->set_texture(0, "s_tex0", g_buffer_fbo->get_texture(0).get());
-				program->set_texture(1, "s_tex1", g_buffer_fbo->get_texture(1).get());
-				program->set_texture(2, "s_tex2", g_buffer_fbo->get_texture(2).get());
-				program->set_texture(3, "s_tex3", g_buffer_fbo->get_texture(3).get());
-				program->set_texture(4, "s_tex4", g_buffer_fbo->get_texture(4).get());
-				program->set_texture(5, "s_tex_cube", cubemap.get());
-				gfx::set_scissor(rect.left, rect.top, rect.width(), rect.height());
-				auto topology = gfx::clip_quad(1.0f);
-				gfx::set_state(topology | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_BLEND_ALPHA);
-				gfx::submit(pass.id, program->native_handle());
-				gfx::set_state(BGFX_STATE_DEFAULT);
-				program->end();
-			}
-		});
+	// 			program->set_texture(0, "s_tex0", g_buffer_fbo->get_texture(0).get());
+	// 			program->set_texture(1, "s_tex1", g_buffer_fbo->get_texture(1).get());
+	// 			program->set_texture(2, "s_tex2", g_buffer_fbo->get_texture(2).get());
+	// 			program->set_texture(3, "s_tex3", g_buffer_fbo->get_texture(3).get());
+	// 			program->set_texture(4, "s_tex4", g_buffer_fbo->get_texture(4).get());
+	// 			program->set_texture(5, "s_tex_cube", cubemap.get());
+	// 			gfx::set_scissor(rect.left, rect.top, rect.width(), rect.height());
+	// 			auto topology = gfx::clip_quad(1.0f);
+	// 			gfx::set_state(topology | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_BLEND_ALPHA);
+	// 			gfx::submit(pass.id, program->native_handle());
+	// 			gfx::set_state(BGFX_STATE_DEFAULT);
+	// 			program->end();
+	// 		}
+	// 	});
 
 	return r_buffer_fbo;
 }

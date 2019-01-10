@@ -1,7 +1,7 @@
 #pragma once
 #include "inspector.h"
 
-#include <runtime/ecs/ecs.h>
+#include <runtime/ecs/ent.h>
 
 struct inspector_entity : public inspector
 {

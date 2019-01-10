@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 #include <fstream>
 #include <memory>
 
@@ -11,6 +11,6 @@ struct scene
 		standard,
 		additive,
 	};
-	std::vector<runtime::entity> instantiate(mode mod);
+	std::vector<EntityType> instantiate(mode mod);
 	std::shared_ptr<std::istream> data;
 };

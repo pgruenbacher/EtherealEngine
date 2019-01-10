@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../rendering/model.h"
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 
 class material;
 //-----------------------------------------------------------------------------
@@ -13,7 +13,7 @@ class material;
 /// Class that contains core data for meshes.
 /// </summary>
 //-----------------------------------------------------------------------------
-class model_component : public runtime::component_impl<model_component>
+class model_component : public ent::component_impl<model_component>
 {
 	SERIALIZABLE(model_component)
 	REFLECTABLEV(model_component, component)
@@ -105,8 +105,8 @@ public:
 	//-----------------------------------------------------------------------------
 	void set_model(const model& model);
 
-	void set_bone_entities(const std::vector<runtime::entity>& bone_entities);
-	const std::vector<runtime::entity>& get_bone_entities() const;
+	void set_bone_entities(const std::vector<EntityType>& bone_entities);
+	const std::vector<EntityType>& get_bone_entities() const;
 	void set_bone_transforms(const std::vector<math::transform>& bone_transforms);
 	const std::vector<math::transform>& get_bone_transforms() const;
 
@@ -123,6 +123,6 @@ private:
 	///
 	model model_;
 	///
-	std::vector<runtime::entity> bone_entities_;
+	std::vector<EntityType> bone_entities_;
 	std::vector<math::transform> bone_transforms_;
 };

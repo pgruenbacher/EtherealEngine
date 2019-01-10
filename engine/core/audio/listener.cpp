@@ -10,6 +10,17 @@ listener::listener()
 
 listener::~listener() = default;
 
+// required for moving listener object around
+// using std::move when part of its parent component
+listener::listener(listener&& o) :
+    impl_(std::move(o.impl_))
+{
+}
+void listener::operator=(listener&& o)
+{
+    impl_ = (std::move(o.impl_));
+}
+
 void listener::set_volume(float volume)
 {
     if(impl_)

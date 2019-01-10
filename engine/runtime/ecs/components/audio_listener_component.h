@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 
 #include <core/audio/listener.h>
 #include <core/math/math_includes.h>
@@ -15,7 +15,7 @@
 /// There can only be one instance of it per scene.
 /// </summary>
 //-----------------------------------------------------------------------------
-class audio_listener_component : public runtime::component_impl<audio_listener_component>
+class audio_listener_component : public ent::component_impl<audio_listener_component>
 {
 	SERIALIZABLE(audio_listener_component)
 	REFLECTABLEV(audio_listener_component, component)

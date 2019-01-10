@@ -1,14 +1,14 @@
-#pragma once
-#include "../../ecs/ecs.h"
+// #pragma once
+// #include "../../ecs/ecs.h"
 
-#include <core/reflection/reflection.h>
-#include <core/serialization/serialization.h>
+// #include <core/reflection/reflection.h>
+// #include <core/serialization/serialization.h>
 
-namespace runtime
-{
+// namespace runtime
+// {
 
-std::map<std::uint64_t, EntityType>& get_serialization_map();
+// std::map<std::uint64_t, EntityType>& get_serialization_map();
 
-SAVE_EXTERN(entity);
-LOAD_EXTERN(entity);
-}
+// SAVE_EXTERN(entity);
+// LOAD_EXTERN(entity);
+// }

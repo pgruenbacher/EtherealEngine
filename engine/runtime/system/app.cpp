@@ -59,7 +59,7 @@ void app::start(cmd_line::parser& parser)
 	core::add_subsystem<asset_manager>();
 	core::add_subsystem<core::task_system>(false);
 	setup_asset_manager();
-	core::add_subsystem<entity_component_system>();
+	core::add_subsystem<SpatialSystem>();
 	core::add_subsystem<scene_graph>();
 	core::add_subsystem<bone_system>();
 	core::add_subsystem<camera_system>();

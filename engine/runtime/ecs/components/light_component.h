@@ -3,7 +3,7 @@
 // light_component Header Includes
 //-----------------------------------------------------------------------------
 #include "../../rendering/light.h"
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 
 #include <core/common/basetypes.hpp>
 //-----------------------------------------------------------------------------
@@ -20,10 +20,10 @@
 /// things.
 /// </summary>
 //-----------------------------------------------------------------------------
-class light_component : public runtime::component_impl<light_component>
+class light_component : public ent::component_impl<light_component>
 {
 	SERIALIZABLE(light_component)
-	REFLECTABLEV(light_component, runtime::component)
+	REFLECTABLEV(light_component, ent::component)
 public:
 	//-------------------------------------------------------------------------
 	// Public Methods
@@ -75,10 +75,10 @@ private:
 };
 
 
-class light_component2 : public runtime::component_impl<light_component2>
+class light_component2 : public ent::component_impl<light_component2>
 {
 	SERIALIZABLE(light_component2)
-	REFLECTABLEV(light_component2, runtime::component)
+	REFLECTABLEV(light_component2, ent::component)
 public:
 	//-------------------------------------------------------------------------
 	// Public Methods

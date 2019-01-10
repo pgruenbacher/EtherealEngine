@@ -276,9 +276,9 @@ void draw_selected_camera(const ImVec2& size)
 	auto& selected = es.selection_data.object;
 	auto& editor_camera = es.camera;
 
-	if(selected.is_type<runtime::entity>())
+	if(selected.is_type<EntityType>())
 	{
-		auto sel = selected.get_value<runtime::entity>();
+		auto sel = selected.get_value<EntityType>();
 
 		if(sel && (editor_camera != sel) && sel.has_component<camera_component>())
 		{
@@ -349,9 +349,9 @@ void manipulation_gizmos()
 		}
 	}
 
-	if(selected && selected.is_type<runtime::entity>())
+	if(selected && selected.is_type<EntityType>())
 	{
-		auto sel = selected.get_value<runtime::entity>();
+		auto sel = selected.get_value<EntityType>();
 		if(sel && sel != editor_camera && sel.has_component<transform_component>())
 		{
 			auto p = gui::GetItemRectMin();
@@ -520,7 +520,7 @@ void handle_camera_movement()
 
 static void process_drag_drop_target(std::shared_ptr<camera_component> camera_comp)
 {
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 
@@ -688,9 +688,9 @@ void scene_dock::render(const ImVec2& area)
 
 			if(input.is_key_pressed(mml::keyboard::Delete))
 			{
-				if(selected && selected.is_type<runtime::entity>())
+				if(selected && selected.is_type<EntityType>())
 				{
-					auto sel = selected.get_value<runtime::entity>();
+					auto sel = selected.get_value<EntityType>();
 					if(sel && sel != editor_camera)
 					{
 						sel.destroy();
@@ -703,9 +703,9 @@ void scene_dock::render(const ImVec2& area)
 			{
 				if(input.is_key_down(mml::keyboard::LControl))
 				{
-					if(selected && selected.is_type<runtime::entity>())
+					if(selected && selected.is_type<EntityType>())
 					{
-						auto sel = selected.get_value<runtime::entity>();
+						auto sel = selected.get_value<EntityType>();
 						if(sel && sel != editor_camera)
 						{
 							auto clone = ecs::utils::clone_entity(sel);

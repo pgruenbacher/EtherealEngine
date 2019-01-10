@@ -103,7 +103,7 @@ public:
 		id_t()
             : id_(0)
         {}
-        
+
 		explicit id_t(std::uint64_t id)
 			: id_(id)
 		{

@@ -15,7 +15,7 @@
 #include <runtime/ecs/constructs/prefab.h>
 #include <runtime/ecs/constructs/scene.h>
 #include <runtime/ecs/constructs/utils.h>
-#include <runtime/ecs/ecs.h>
+#include <runtime/ecs/ent.h>
 #include <runtime/rendering/material.h>
 #include <runtime/rendering/mesh.h>
 
@@ -144,7 +144,7 @@ static void process_drag_drop_target(const fs::path& absolute_path)
 				{
 					std::uint32_t entity_index = 0;
 					std::memcpy(&entity_index, payload->Data, std::size_t(payload->DataSize));
-					auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+					auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 					if(ecs.valid_index(entity_index))
 					{
 						auto eid = ecs.create_id(entity_index);

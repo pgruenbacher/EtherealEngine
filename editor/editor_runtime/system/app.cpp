@@ -54,13 +54,13 @@ void create_window_with_dock(const std::string& dock_name)
 	rend.register_window(std::move(window));
 	docking.register_dock(std::move(dock));
 }
-std::vector<runtime::entity> gather_scene_data()
+std::vector<EntityType> gather_scene_data()
 {
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& sg = core::get_subsystem<runtime::scene_graph>();
 	const auto& roots = sg.get_roots();
 	auto editor_camera = es.camera;
-	std::vector<runtime::entity> entities;
+	std::vector<EntityType> entities;
 	for(auto root : roots)
 	{
 		if(root.valid() && root != editor_camera)
@@ -73,7 +73,7 @@ std::vector<runtime::entity> gather_scene_data()
 void default_scene()
 {
 	auto& am = core::get_subsystem<runtime::asset_manager>();
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 
 	{
 		auto object = ecs.create();
@@ -181,7 +181,7 @@ void default_scene()
 auto create_new_scene()
 {
 	auto& es = core::get_subsystem<editor::editing_system>();
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 	es.save_editor_camera();
 	ecs.dispose();
 	es.load_editor_camera();
@@ -299,7 +299,7 @@ void app::draw_menubar(render_window& window)
 			{
 				save_scene();
 			}
-			auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+			auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 
 			if(gui::MenuItem("SAVE AS..", "CTRL+SHIFT+S", false, ecs.size() > 0 && current_project != ""))
 			{

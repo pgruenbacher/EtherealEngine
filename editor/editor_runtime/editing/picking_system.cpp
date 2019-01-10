@@ -28,7 +28,7 @@ void picking_system::frame_render(delta_t dt)
 	auto& es = core::get_subsystem<editing_system>();
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& renderer = core::get_subsystem<runtime::renderer>();
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 
 	const auto render_frame = renderer.get_render_frame();
 
@@ -82,7 +82,7 @@ void picking_system::frame_render(delta_t dt)
 		pass.bind(surface_.get());
 
 		ecs.for_each<transform_component, model_component>(
-			[this, &pass, &pick_frustum](runtime::entity e, transform_component& transform_comp_ref,
+			[this, &pass, &pick_frustum](EntityType e, transform_component& transform_comp_ref,
 										 model_component& model_comp_ref) {
 				auto& model = model_comp_ref.get_model();
 				if(!model.is_valid())

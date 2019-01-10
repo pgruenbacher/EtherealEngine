@@ -10,14 +10,14 @@ namespace runtime
 {
 void audio_system::frame_update(delta_t dt)
 {
-	auto& ecs = core::get_subsystem<entity_component_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 
-	ecs.for_each<transform_component, audio_source_component>(
-		[](entity e, transform_component& transform, audio_source_component& source) {
+	ecs.view<transform_component, audio_source_component>().each(
+		[](EntityType e, auto& transform, auto& source) {
 			source.update(transform.get_transform());
 		});
-	ecs.for_each<transform_component, audio_listener_component>(
-		[](entity e, transform_component& transform, audio_listener_component& listener) {
+	ecs.view<transform_component, audio_listener_component>().each(
+		[](EntityType e, auto& transform, auto& listener) {
 			listener.update(transform.get_transform());
 		});
 }

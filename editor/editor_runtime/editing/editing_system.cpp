@@ -51,11 +51,11 @@ void editing_system::save_editor_camera()
 
 void editing_system::load_editor_camera()
 {
-	runtime::entity object;
+	EntityType object;
 	if(!ecs::utils::try_load_entity_from_file(fs::resolve_protocol("app:/settings/editor_camera.cfg"),
 											  object))
 	{
-		auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+		auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 		object = ecs.create();
 	}
 	object.set_name("EDITOR CAMERA");

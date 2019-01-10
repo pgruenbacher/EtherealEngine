@@ -3,7 +3,7 @@
 #include "../../rendering/gpu_program.h"
 #include "../components/model_component.h"
 #include "../components/transform_component.h"
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 
 #include <core/common/basetypes.hpp>
 
@@ -46,7 +46,7 @@ public:
 	///
 	/// </summary>
 	//-----------------------------------------------------------------------------
-	visibility_set_models_t gather_visible_models(entity_component_system& ecs, camera* camera,
+	visibility_set_models_t gather_visible_models(SpatialSystem& ecs, camera* camera,
 												  bool dirty_only = false, bool static_only = true,
 												  bool require_reflection_caster = false);
 	//-----------------------------------------------------------------------------
@@ -77,7 +77,7 @@ public:
 	///
 	/// </summary>
 	//-----------------------------------------------------------------------------
-	void build_reflections_pass(entity_component_system& ecs, delta_t dt);
+	void build_reflections_pass(SpatialSystem& ecs, delta_t dt);
 
 	//-----------------------------------------------------------------------------
 	//  Name : build_shadows ()
@@ -87,7 +87,7 @@ public:
 	///
 	/// </summary>
 	//-----------------------------------------------------------------------------
-	void build_shadows_pass(entity_component_system& ecs, delta_t dt);
+	void build_shadows_pass(SpatialSystem& ecs, delta_t dt);
 
 	//-----------------------------------------------------------------------------
 	//  Name : camera_pass ()
@@ -97,7 +97,7 @@ public:
 	///
 	/// </summary>
 	//-----------------------------------------------------------------------------
-	void camera_pass(entity_component_system& ecs, delta_t dt);
+	void camera_pass(SpatialSystem& ecs, delta_t dt);
 
 	//-----------------------------------------------------------------------------
 	//  Name : scene_pass ()
@@ -108,7 +108,7 @@ public:
 	/// </summary>
 	//-----------------------------------------------------------------------------
 	std::shared_ptr<gfx::frame_buffer> deferred_render_full(camera& camera, gfx::render_view& render_view,
-															entity_component_system& ecs,
+															SpatialSystem& ecs,
 															std::unordered_map<entity, lod_data>& camera_lods,
 															delta_t dt);
 
@@ -136,7 +136,7 @@ public:
 	//-----------------------------------------------------------------------------
 	std::shared_ptr<gfx::frame_buffer> lighting_pass(std::shared_ptr<gfx::frame_buffer> input, camera& camera,
 													 gfx::render_view& render_view,
-													 entity_component_system& ecs, delta_t dt);
+													 SpatialSystem& ecs, delta_t dt);
 
 	//-----------------------------------------------------------------------------
 	//  Name : reflection_probe ()
@@ -148,7 +148,7 @@ public:
 	//-----------------------------------------------------------------------------
 	std::shared_ptr<gfx::frame_buffer> reflection_probe_pass(std::shared_ptr<gfx::frame_buffer> input,
 															 camera& camera, gfx::render_view& render_view,
-															 entity_component_system& ecs, delta_t dt);
+															 SpatialSystem& ecs, delta_t dt);
 
 	//-----------------------------------------------------------------------------
 	//  Name : atmospherics_pass ()
@@ -160,7 +160,7 @@ public:
 	//-----------------------------------------------------------------------------
 	std::shared_ptr<gfx::frame_buffer> atmospherics_pass(std::shared_ptr<gfx::frame_buffer> input,
 														 camera& camera, gfx::render_view& render_view,
-														 entity_component_system& ecs, delta_t dt);
+														 SpatialSystem& ecs, delta_t dt);
 
 	//-----------------------------------------------------------------------------
 	//  Name : tonemapping_pass ()

@@ -24,7 +24,7 @@ REFLECT(transform_component)
 
 SAVE(transform_component)
 {
-	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 	try_save(ar, cereal::make_nvp("local_transform", obj.local_transform_));
 	try_save(ar, cereal::make_nvp("children", obj.children_));
 }
@@ -33,7 +33,7 @@ SAVE_INSTANTIATE(transform_component, cereal::oarchive_binary_t);
 
 LOAD(transform_component)
 {
-	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 	try_load(ar, cereal::make_nvp("local_transform", obj.local_transform_));
 	try_load(ar, cereal::make_nvp("children", obj.children_));
 

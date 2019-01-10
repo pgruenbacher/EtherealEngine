@@ -2,7 +2,7 @@
 
 #include "imguidock.h"
 
-#include <runtime/ecs/ecs.h>
+#include <runtime/ecs/ent.h>
 
 struct hierarchy_dock : public imguidock::dock
 {
@@ -10,7 +10,7 @@ struct hierarchy_dock : public imguidock::dock
 
 	void render(const ImVec2& area);
 
-	void draw_entity(runtime::entity entity);
+	void draw_entity(EntityType entity);
 
 private:
 	bool edit_label_ = false;

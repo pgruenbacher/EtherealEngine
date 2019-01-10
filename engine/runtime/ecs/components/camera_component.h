@@ -3,7 +3,7 @@
 // camera_component Header Includes
 //-----------------------------------------------------------------------------
 #include "../../rendering/camera.h"
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 
 #include <core/common/basetypes.hpp>
 #include <core/graphics/render_pass.h>
@@ -23,10 +23,10 @@
 /// things.
 /// </summary>
 //-----------------------------------------------------------------------------
-class camera_component : public runtime::component_impl<camera_component>
+class camera_component : public ent::component_impl<camera_component>
 {
 	SERIALIZABLE(camera_component)
-	REFLECTABLEV(camera_component, runtime::component)
+	REFLECTABLEV(camera_component, ent::component)
 public:
 	//-------------------------------------------------------------------------
 	// Constructors & Destructors

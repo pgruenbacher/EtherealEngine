@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 
 #include <core/common/basetypes.hpp>
 

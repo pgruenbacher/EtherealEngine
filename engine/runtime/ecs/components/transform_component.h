@@ -1,6 +1,6 @@
 #pragma once
 
-// #include "../ecs.h"
+// #include "runtime/ecs/ent.h"
 #include "runtime/ecs/ent.h"
 #include <core/math/math_includes.h>
 
@@ -21,12 +21,12 @@ class transform_component : public ent::component_impl<transform_component>
 	REFLECTABLEV(transform_component, ent::component)
 
 public:
-	transform_component() = default;
-	~transform_component() override;
+	// transform_component() = default;
+	~transform_component();
 	void resolve(bool force = false);
 	void set_dirty(bool dirty);
 	bool is_dirty() const;
-	virtual void on_entity_set() override;
+	// virtual void on_entity_set() override;
 	const math::transform& get_local_transform() const;
 	const math::transform& get_transform();
 	const math::vec3& get_position();
@@ -73,13 +73,13 @@ public:
 	bool can_adjust_pivot() const;
 	bool can_scale() const;
 	bool can_rotate() const;
-	void set_parent(EntityType parent, bool world_position_stays, bool local_position_stays);
-	void set_parent(EntityType parent);
-	const EntityType& get_parent() const;
-	const std::vector<EntityType>& get_children() const;
-	void attach_child(const EntityType& child);
-	void remove_child(const EntityType& child);
-	void cleanup_dead_children();
+	// void set_parent(ActorType parent, bool world_position_stays, bool local_position_stays);
+	// void set_parent(ActorType parent);
+	// const EntityType& get_parent() const;
+	// const std::vector<EntityType>& get_children() const;
+	// void attach_child(const EntityType& child);
+	// void remove_child(const EntityType& child);
+	// void cleanup_dead_children();
 
 protected:
     void apply_transform(math::transform& trans);
@@ -91,7 +91,7 @@ protected:
 	/// Parent object.
 	EntityType parent_;
 	/// Children objects.
-	std::vector<EntityType> children_;
+	// std::vector<EntityType> children_;
 	/// Local transformation relative to the parent
 	math::transform local_transform_;
 	/// Cached world transformation at pivot point.

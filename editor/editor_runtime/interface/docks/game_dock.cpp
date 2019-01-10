@@ -4,7 +4,7 @@
 #include <core/system/subsystem.h>
 
 #include <runtime/ecs/components/camera_component.h>
-#include <runtime/ecs/ecs.h>
+#include <runtime/ecs/ent.h>
 #include <runtime/rendering/camera.h>
 
 void game_dock::render(const ImVec2&)
@@ -12,8 +12,8 @@ void game_dock::render(const ImVec2&)
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& editor_camera = es.camera;
 
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
-	ecs.for_each<camera_component>([&editor_camera](runtime::entity e, camera_component& camera_comp) {
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+	ecs.for_each<camera_component>([&editor_camera](EntityType e, camera_component& camera_comp) {
 		if(e == editor_camera)
 			return;
 

@@ -9,7 +9,7 @@ namespace runtime
 {
 void camera_system::frame_update(delta_t)
 {
-	auto& ecs = core::get_subsystem<entity_component_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 
 	ecs.for_each<transform_component, camera_component>(
 		[](entity e, transform_component& transform, camera_component& camera) {

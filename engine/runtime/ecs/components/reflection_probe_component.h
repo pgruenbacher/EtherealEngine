@@ -3,8 +3,8 @@
 // reflection_probe_component Header Includes
 //-----------------------------------------------------------------------------
 #include "../../rendering/reflection_probe.h"
-// #include "../ecs.h"
-#include "../ent.h"
+// #include "runtime/ecs/ent.h"
+#include "runtime/ecs/ent.h"
 
 #include <core/common/basetypes.hpp>
 #include <core/graphics/render_pass.h>

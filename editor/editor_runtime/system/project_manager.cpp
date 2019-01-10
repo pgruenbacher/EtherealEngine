@@ -12,7 +12,7 @@
 #include <core/tasks/task_system.h>
 
 #include <runtime/assets/asset_manager.h>
-#include <runtime/ecs/ecs.h>
+#include <runtime/ecs/ent.h>
 #include <runtime/system/events.h>
 
 #include <fstream>
@@ -157,7 +157,7 @@ void add_to_syncer<gfx::shader>(std::vector<uint64_t>& watchers, fs::syncer& syn
 
 void project_manager::close_project()
 {
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
 	auto& es = core::get_subsystem<editing_system>();
 	es.close_project();

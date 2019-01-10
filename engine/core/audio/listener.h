@@ -25,6 +25,11 @@ public:
     listener();
     ~listener();
 
+    // required for moving listener object around
+    // using std::move when part of its parent component
+    listener(listener&& o);
+    void operator=(listener&& o);
+
     //-----------------------------------------------------------------------------
     //  Name : set_volume ()
     /// <summary>

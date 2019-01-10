@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 #include <fstream>
 #include <memory>
 
 struct prefab
 {
-	runtime::entity instantiate();
+	EntityType instantiate();
 	std::shared_ptr<std::istream> data;
 };

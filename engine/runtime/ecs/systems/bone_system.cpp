@@ -10,8 +10,8 @@ namespace runtime
 {
 
 void process_node(const std::unique_ptr<mesh::armature_node>& node, const skin_bind_data& bind_data,
-				  runtime::entity& parent, std::vector<runtime::entity>& entity_nodes,
-				  runtime::entity_component_system& ecs)
+				  runtime::entity& parent, std::vector<EntityType>& entity_nodes,
+				  runtime::SpatialSystem& ecs)
 {
 	if(!parent.valid())
 		return;
@@ -36,7 +36,7 @@ void process_node(const std::unique_ptr<mesh::armature_node>& node, const skin_b
 }
 
 static std::vector<math::transform>
-get_transforms_for_bones(const std::vector<runtime::entity>& bone_entities)
+get_transforms_for_bones(const std::vector<EntityType>& bone_entities)
 {
 	std::vector<math::transform> result;
 	if(!bone_entities.empty())
@@ -68,8 +68,8 @@ get_transforms_for_bones(const std::vector<runtime::entity>& bone_entities)
 
 void bone_system::frame_update(delta_t)
 {
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
-	ecs.for_each<model_component>([&ecs](runtime::entity e, model_component& model_comp) {
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+	ecs.for_each<model_component>([&ecs](EntityType e, model_component& model_comp) {
 
 		const auto& model = model_comp.get_model();
 		auto mesh = model.get_lod(0);
@@ -86,7 +86,7 @@ void bone_system::frame_update(delta_t)
 			if(model_comp.get_bone_entities().size() <= 1)
 			{
 				const auto& armature = mesh->get_armature();
-				std::vector<runtime::entity> be;
+				std::vector<EntityType> be;
 				process_node(armature, skin_data, e, be, ecs);
 				model_comp.set_bone_entities(be);
 				model_comp.set_static(false);

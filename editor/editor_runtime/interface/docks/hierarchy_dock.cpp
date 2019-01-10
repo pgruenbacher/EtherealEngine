@@ -22,7 +22,7 @@
 #include <runtime/rendering/mesh.h>
 namespace
 {
-math::bbox calc_bounds(runtime::entity entity)
+math::bbox calc_bounds(EntityType entity)
 {
 	const math::vec3 one = {1.0f, 1.0f, 1.0f};
 	math::bbox bounds = math::bbox(-one, one);
@@ -51,7 +51,7 @@ math::bbox calc_bounds(runtime::entity entity)
 	return bounds;
 };
 
-void focus_entity_on_bounds(runtime::entity entity, const math::bbox& bounds)
+void focus_entity_on_bounds(EntityType entity, const math::bbox& bounds)
 {
 	auto trans_comp = entity.get_component<transform_component>().lock();
 	auto camera_comp = entity.get_component<camera_component>().lock();
@@ -82,10 +82,10 @@ enum class context_action
 	rename,
 };
 }
-static context_action check_context_menu(runtime::entity entity)
+static context_action check_context_menu(EntityType entity)
 {
 	auto& es = core::get_subsystem<editor::editing_system>();
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 	auto& editor_camera = es.camera;
 	context_action action = context_action::none;
 	if(entity && entity != editor_camera)
@@ -281,7 +281,7 @@ static context_action check_context_menu(runtime::entity entity)
 	return action;
 }
 
-static bool process_drag_drop_source(runtime::entity entity)
+static bool process_drag_drop_source(EntityType entity)
 {
 	if(entity && gui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 	{
@@ -295,9 +295,9 @@ static bool process_drag_drop_source(runtime::entity entity)
 	return false;
 }
 
-static void process_drag_drop_target(runtime::entity entity)
+static void process_drag_drop_target(EntityType entity)
 {
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 
@@ -403,7 +403,7 @@ static void process_drag_drop_target(runtime::entity entity)
 	}
 }
 
-static void check_drag(runtime::entity entity)
+static void check_drag(EntityType entity)
 {
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& editor_camera = es.camera;
@@ -417,7 +417,7 @@ static void check_drag(runtime::entity entity)
 	}
 }
 
-void hierarchy_dock::draw_entity(runtime::entity entity)
+void hierarchy_dock::draw_entity(EntityType entity)
 {
 	if(!entity)
 	{
@@ -432,9 +432,9 @@ void hierarchy_dock::draw_entity(runtime::entity entity)
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& selected = es.selection_data.object;
 	bool is_selected = false;
-	if(selected && selected.is_type<runtime::entity>())
+	if(selected && selected.is_type<EntityType>())
 	{
-		is_selected = selected.get_value<runtime::entity>() == entity;
+		is_selected = selected.get_value<EntityType>() == entity;
 	}
 
 	std::string name = entity.to_string();
@@ -582,9 +582,9 @@ void hierarchy_dock::render(const ImVec2& /*unused*/)
 		{
 			if(input.is_key_pressed(mml::keyboard::Delete))
 			{
-				if(selected && selected.is_type<runtime::entity>())
+				if(selected && selected.is_type<EntityType>())
 				{
-					auto sel = selected.get_value<runtime::entity>();
+					auto sel = selected.get_value<EntityType>();
 					if(sel && sel != editor_camera)
 					{
 						sel.destroy();
@@ -595,9 +595,9 @@ void hierarchy_dock::render(const ImVec2& /*unused*/)
 
 			if(input.is_key_pressed(mml::keyboard::D, mml::keyboard::LControl))
 			{
-				if(selected && selected.is_type<runtime::entity>())
+				if(selected && selected.is_type<EntityType>())
 				{
-					auto sel = selected.get_value<runtime::entity>();
+					auto sel = selected.get_value<EntityType>();
 					if(sel && sel != editor_camera)
 					{
 						auto clone = ecs::utils::clone_entity(sel);
@@ -614,9 +614,9 @@ void hierarchy_dock::render(const ImVec2& /*unused*/)
 		}
 		if(input.is_key_pressed(mml::keyboard::F, mml::keyboard::LShift))
 		{
-			if(selected && selected.is_type<runtime::entity>())
+			if(selected && selected.is_type<EntityType>())
 			{
-				auto sel = selected.get_value<runtime::entity>();
+				auto sel = selected.get_value<EntityType>();
 				if(sel && sel != editor_camera)
 				{
 					if(editor_camera.has_component<transform_component>() &&

@@ -15,14 +15,14 @@ REFLECT(audio_listener_component)
 
 SAVE(audio_listener_component)
 {
-	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 }
 SAVE_INSTANTIATE(audio_listener_component, cereal::oarchive_associative_t);
 SAVE_INSTANTIATE(audio_listener_component, cereal::oarchive_binary_t);
 
 LOAD(audio_listener_component)
 {
-	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 }
 LOAD_INSTANTIATE(audio_listener_component, cereal::iarchive_associative_t);
 LOAD_INSTANTIATE(audio_listener_component, cereal::iarchive_binary_t);

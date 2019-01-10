@@ -92,10 +92,10 @@ void debugdraw_system::frame_render(delta_t)
 		}
 	}
 
-	if(!selected || !selected.is_type<runtime::entity>())
+	if(!selected || !selected.is_type<EntityType>())
 		return;
 
-	auto selected_entity = selected.get_value<runtime::entity>();
+	auto selected_entity = selected.get_value<EntityType>();
 
 	if(!selected_entity || !selected_entity.has_component<transform_component>())
 		return;

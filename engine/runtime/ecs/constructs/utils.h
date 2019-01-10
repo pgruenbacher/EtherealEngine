@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 
 #include <core/filesystem/filesystem.h>
 
@@ -12,7 +12,7 @@ namespace ecs
 namespace utils
 {
 
-runtime::entity clone_entity(const runtime::entity& data);
+EntityType clone_entity(const EntityType data);
 //-----------------------------------------------------------------------------
 //  Name : save_entity ()
 /// <summary>
@@ -21,7 +21,7 @@ runtime::entity clone_entity(const runtime::entity& data);
 ///
 /// </summary>
 //-----------------------------------------------------------------------------
-void save_entity_to_file(const fs::path& full_path, const runtime::entity& data);
+void save_entity_to_file(const fs::path& full_path, const EntityType data);
 
 //-----------------------------------------------------------------------------
 //  Name : try_load_entity ()
@@ -31,7 +31,7 @@ void save_entity_to_file(const fs::path& full_path, const runtime::entity& data)
 ///
 /// </summary>
 //-----------------------------------------------------------------------------
-bool try_load_entity_from_file(const fs::path& full_path, runtime::entity& out_data);
+bool try_load_entity_from_file(const fs::path& full_path, EntityType out_data);
 
 //-----------------------------------------------------------------------------
 //  Name : save_data ()
@@ -41,7 +41,7 @@ bool try_load_entity_from_file(const fs::path& full_path, runtime::entity& out_d
 ///
 /// </summary>
 //-----------------------------------------------------------------------------
-void save_entities_to_file(const fs::path& full_path, const std::vector<runtime::entity>& data);
+void save_entities_to_file(const fs::path& full_path, const std::vector<EntityType>& data);
 
 //-----------------------------------------------------------------------------
 //  Name : load_data ()
@@ -51,7 +51,7 @@ void save_entities_to_file(const fs::path& full_path, const std::vector<runtime:
 ///
 /// </summary>
 //-----------------------------------------------------------------------------
-bool load_entities_from_file(const fs::path& full_path, std::vector<runtime::entity>& out_data);
+bool load_entities_from_file(const fs::path& full_path, std::vector<EntityType>& out_data);
 
 //-----------------------------------------------------------------------------
 //  Name : deserialize_data ()
@@ -61,6 +61,6 @@ bool load_entities_from_file(const fs::path& full_path, std::vector<runtime::ent
 ///
 /// </summary>
 //-----------------------------------------------------------------------------
-bool deserialize_data(std::istream& stream, std::vector<runtime::entity>& out_data);
+bool deserialize_data(std::istream& stream, std::vector<EntityType>& out_data);
 }
 }

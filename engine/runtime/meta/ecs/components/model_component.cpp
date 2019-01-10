@@ -24,7 +24,7 @@ REFLECT(model_component)
 
 SAVE(model_component)
 {
-	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 	try_save(ar, cereal::make_nvp("static", obj.static_));
 	try_save(ar, cereal::make_nvp("casts_shadow", obj.casts_shadow_));
 	try_save(ar, cereal::make_nvp("casts_reflection", obj.casts_reflection_));
@@ -36,7 +36,7 @@ SAVE_INSTANTIATE(model_component, cereal::oarchive_binary_t);
 
 LOAD(model_component)
 {
-	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 	try_load(ar, cereal::make_nvp("static", obj.static_));
 	try_load(ar, cereal::make_nvp("casts_shadow", obj.casts_shadow_));
 	try_load(ar, cereal::make_nvp("casts_reflection", obj.casts_reflection_));

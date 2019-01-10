@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../assets/asset_handle.h"
-#include "../ecs.h"
+#include "runtime/ecs/ent.h"
 
 #include <core/audio/source.h>
 #include <core/common/basetypes.hpp>
@@ -17,7 +17,7 @@
 /// There can only be one instance of it per scene.
 /// </summary>
 //-----------------------------------------------------------------------------
-class audio_source_component : public runtime::component_impl<audio_source_component>
+class audio_source_component : public ent::component_impl<audio_source_component>
 {
 	SERIALIZABLE(audio_source_component)
 	REFLECTABLEV(audio_source_component, component)

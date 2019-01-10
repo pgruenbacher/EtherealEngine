@@ -4,39 +4,39 @@
 
 #include <algorithm>
 
-void transform_component::on_entity_set()
-{
-	for(auto& child : children_)
-	{
-		if(child.valid())
-		{
-			auto child_transform = child.get_component<transform_component>().lock();
-			if(child_transform)
-			{
-				child_transform->parent_ = get_entity();
-			}
-		}
-	}
-}
+// void transform_component::on_entity_set()
+// {
+// 	for(auto& child : children_)
+// 	{
+// 		if(child.valid())
+// 		{
+// 			auto child_transform = child.get_component<transform_component>().lock();
+// 			if(child_transform)
+// 			{
+// 				child_transform->parent_ = get_entity();
+// 			}
+// 		}
+// 	}
+// }
 
 transform_component::~transform_component()
 {
-	if(parent_.valid())
-	{
-		auto parent_transform = parent_.get_component<transform_component>().lock();
-		if(parent_transform)
-		{
-			parent_transform->remove_child(get_entity());
-		}
-	}
+	// if(parent_.valid())
+	// {
+	// 	auto parent_transform = parent_.get_component<transform_component>().lock();
+	// 	if(parent_transform)
+	// 	{
+	// 		parent_transform->remove_child(get_entity());
+	// 	}
+	// }
 
-	for(auto& child : children_)
-	{
-		if(child.valid())
-		{
-			child.destroy();
-		}
-	}
+	// for(auto& child : children_)
+	// {
+	// 	if(child.valid())
+	// 	{
+	// 		child.destroy();
+	// 	}
+	// }
 }
 
 void transform_component::move(const math::vec3& amount)
@@ -290,111 +290,111 @@ bool transform_component::can_adjust_pivot() const
 	return true;
 }
 
-void transform_component::set_parent(EntityType parent)
-{
-	set_parent(parent, true, false);
-}
+// void transform_component::set_parent(ActorType parent)
+// {
+// 	set_parent(parent, true, false);
+// }
 
-bool check_parent(const EntityType& e, const EntityType& parent)
-{
-	if(e == parent)
-		return false;
+// bool check_parent(const ActorType& e, const ActorType& parent)
+// {
+// 	if(e == parent)
+// 		return false;
 
-	if(parent.valid() && (parent.has_component<transform_component>() == false))
-		return false;
+// 	if(parent.valid() && (parent.has_component<transform_component>() == false))
+// 		return false;
 
-	if(e.valid())
-	{
-		auto e_transform = e.get_component<transform_component>().lock();
-		if(e_transform)
-		{
-			for(const auto& child : e_transform->get_children())
-			{
-				if(false == check_parent(child, parent))
-					return false;
-			}
-		}
-	}
+// 	if(e.valid())
+// 	{
+// 		auto e_transform = e.get_component<transform_component>().lock();
+// 		if(e_transform)
+// 		{
+// 			for(const auto& child : e_transform->get_children())
+// 			{
+// 				if(false == check_parent(child, parent))
+// 					return false;
+// 			}
+// 		}
+// 	}
 
-	return true;
-}
+// 	return true;
+// }
 
-void transform_component::set_parent(EntityType parent, bool world_position_stays,
-									 bool local_position_stays)
-{
-	// Skip if this is a no-op.
-	if(check_parent(get_entity(), parent) == false)
-	{
-		return;
-	}
+// void transform_component::set_parent(ActorType parent, bool world_position_stays,
+// 									 bool local_position_stays)
+// {
+// 	// Skip if this is a no-op.
+// 	if(check_parent(get_entity(), parent) == false)
+// 	{
+// 		return;
+// 	}
 
-	// Before we do anything, make sure that all pending math::transform
-	// operations are resolved (including those applied to our parent).
-	math::transform cached_world_transform;
-	if(world_position_stays)
-	{
-		resolve(true);
-		cached_world_transform = get_transform();
-	}
-	if(parent_.valid())
-	{
-		auto parent_transform = parent_.get_component<transform_component>().lock();
-		if(parent_transform)
-		{
-			parent_transform->remove_child(get_entity());
-		}
-	}
+// 	// Before we do anything, make sure that all pending math::transform
+// 	// operations are resolved (including those applied to our parent).
+// 	math::transform cached_world_transform;
+// 	if(world_position_stays)
+// 	{
+// 		resolve(true);
+// 		cached_world_transform = get_transform();
+// 	}
+// 	if(parent_.valid())
+// 	{
+// 		auto parent_transform = parent_.get_component<transform_component>().lock();
+// 		if(parent_transform)
+// 		{
+// 			parent_transform->remove_child(get_entity());
+// 		}
+// 	}
 
-	parent_ = parent;
+// 	parent_ = parent;
 
-	if(parent_.valid())
-	{
-		auto parent_transform = parent_.get_component<transform_component>().lock();
-		if(parent_transform)
-		{
-			parent_transform->attach_child(get_entity());
-		}
-	}
+// 	if(parent_.valid())
+// 	{
+// 		auto parent_transform = parent_.get_component<transform_component>().lock();
+// 		if(parent_transform)
+// 		{
+// 			parent_transform->attach_child(get_entity());
+// 		}
+// 	}
 
-	if(world_position_stays)
-	{
-		resolve(true);
-		set_transform(cached_world_transform);
-	}
-	else
-	{
-		if(!local_position_stays)
-			set_local_transform(math::transform::identity());
-	}
+// 	if(world_position_stays)
+// 	{
+// 		resolve(true);
+// 		set_transform(cached_world_transform);
+// 	}
+// 	else
+// 	{
+// 		if(!local_position_stays)
+// 			set_local_transform(math::transform::identity());
+// 	}
 
-	set_dirty(is_dirty());
-}
+// 	set_dirty(is_dirty());
+// }
 
-const EntityType& transform_component::get_parent() const
-{
-	return parent_;
-}
+// const EntityType& transform_component::get_parent() const
+// {
+// 	return parent_;
+// }
 
-void transform_component::attach_child(const EntityType& child)
-{
-	children_.push_back(child);
+// void transform_component::attach_child(const EntityType& child)
+// {
+// 	children_.push_back(child);
 
-	set_dirty(is_dirty());
-}
+// 	set_dirty(is_dirty());
+// }
 
-void transform_component::remove_child(const EntityType& child)
-{
-	children_.erase(std::remove_if(std::begin(children_), std::end(children_),
-								   [&child](const auto& other) { return child == other; }),
-					std::end(children_));
-}
+// void transform_component::remove_child(const EntityType& child)
+// {
+// 	children_.erase(std::remove_if(std::begin(children_), std::end(children_),
+// 								   [&child](const auto& other) { return child == other; }),
+// 					std::end(children_));
+// }
 
-void transform_component::cleanup_dead_children()
-{
-	children_.erase(std::remove_if(std::begin(children_), std::end(children_),
-								   [](const auto& other) { return other.valid() == false; }),
-					std::end(children_));
-}
+// void transform_component::cleanup_dead_children()
+// {
+// 	children_.erase(std::remove_if(std::begin(children_), std::end(children_),
+// 								   [](const auto& other) { return other.valid() == false; }),
+// 					std::end(children_));
+// }
 
 void transform_component::set_transform(const math::transform& tr)
 {
@@ -418,15 +418,15 @@ void transform_component::set_transform(const math::transform& tr)
 
 void transform_component::apply_transform(math::transform& trans)
 {
-	if(parent_.valid())
-	{
-		auto parent_transform = parent_.get_component<transform_component>().lock();
-		if(parent_transform)
-		{
-			auto inv_parent_transform = math::inverse(parent_transform->get_transform());
-			trans = inv_parent_transform * trans;
-		}
-	}
+	// if(parent_.valid())
+	// {
+	// 	auto parent_transform = parent_.get_component<transform_component>().lock();
+	// 	if(parent_transform)
+	// 	{
+	// 		auto inv_parent_transform = math::inverse(parent_transform->get_transform());
+	// 		trans = inv_parent_transform * trans;
+	// 	}
+	// }
 
 	set_local_transform(trans);
 }
@@ -454,22 +454,22 @@ void transform_component::resolve(bool force)
 {
 	if(force || is_dirty())
 	{
-		if(parent_.valid())
-		{
-			auto parent_transform = parent_.get_component<transform_component>().lock();
-			if(parent_transform)
-			{
-				world_transform_ = parent_transform->get_transform() * local_transform_;
-			}
-			else
-			{
-				world_transform_ = local_transform_;
-			}
-		}
-		else
-		{
-			world_transform_ = local_transform_;
-		}
+		// if(parent_.valid())
+		// {
+		// 	auto parent_transform = parent_.get_component<transform_component>().lock();
+		// 	if(parent_transform)
+		// 	{
+		// 		world_transform_ = parent_transform->get_transform() * local_transform_;
+		// 	}
+		// 	else
+		// 	{
+		// 		world_transform_ = local_transform_;
+		// 	}
+		// }
+		// else
+		// {
+		// 	world_transform_ = local_transform_;
+		// }
 
 		set_dirty(false);
 	}
@@ -488,21 +488,21 @@ void transform_component::set_dirty(bool dirty)
 	{
 		touch();
 
-		for(const auto& child : children_)
-		{
-			if(child.valid())
-			{
-				auto child_transform = child.get_component<transform_component>().lock();
-				if(child_transform)
-				{
-					child_transform->set_dirty(dirty);
-				}
-			}
-		}
+		// for(const auto& child : children_)
+		// {
+		// 	if(child.valid())
+		// 	{
+		// 		auto child_transform = child.get_component<transform_component>().lock();
+		// 		if(child_transform)
+		// 		{
+		// 			child_transform->set_dirty(dirty);
+		// 		}
+		// 	}
+		// }
 	}
 }
 
-const std::vector<EntityType>& transform_component::get_children() const
-{
-	return children_;
-}
+// const std::vector<EntityType>& transform_component::get_children() const
+// {
+// 	return children_;
+// }

@@ -4,7 +4,7 @@
 #include <core/math/math_includes.h>
 
 #include <runtime/assets/asset_handle.h>
-#include <runtime/ecs/ecs.h>
+#include <runtime/ecs/ent.h>
 
 class render_window;
 
@@ -88,7 +88,7 @@ struct editing_system
 	void close_project();
 
 	/// editor camera
-	runtime::entity camera;
+	EntityType camera;
 	/// current scene
 	std::string scene;
 	/// enable editor grid

@@ -3,7 +3,7 @@
 
 bool inspector_entity::inspect(rttr::variant& var, bool read_only, const meta_getter& get_metadata)
 {
-	auto data = var.get_value<runtime::entity>();
+	auto data = var.get_value<EntityType>();
 	if(!data)
 		return false;
 	bool changed = false;
@@ -67,7 +67,7 @@ bool inspector_entity::inspect(rttr::variant& var, bool read_only, const meta_ge
 		gui::Separator();
 		gui::BeginChild("COMPONENT_MENU_CONTEXT", ImVec2(gui::GetContentRegionAvailWidth(), 200.0f));
 
-		auto component_types = rttr::type::get<runtime::component>().get_derived_classes();
+		auto component_types = rttr::type::get<ent::component>().get_derived_classes();
 
 		for(auto& component_type : component_types)
 		{
@@ -87,7 +87,7 @@ bool inspector_entity::inspect(rttr::variant& var, bool read_only, const meta_ge
 				if(gui::Selectable(name.c_str()))
 				{
 					auto c = cstructor.invoke();
-					auto c_ptr = c.get_value<std::shared_ptr<runtime::component>>();
+					auto c_ptr = c.get_value<std::shared_ptr<ent::component>>();
 
 					if(c_ptr)
 						data.assign(c_ptr);

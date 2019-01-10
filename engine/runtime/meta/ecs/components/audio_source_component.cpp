@@ -34,7 +34,7 @@ REFLECT(audio_source_component)
 
 SAVE(audio_source_component)
 {
-	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_save(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 	try_save(ar, cereal::make_nvp("auto_play", obj.auto_play_));
 	try_save(ar, cereal::make_nvp("loop", obj.loop_));
 	try_save(ar, cereal::make_nvp("volume", obj.volume_));
@@ -48,7 +48,7 @@ SAVE_INSTANTIATE(audio_source_component, cereal::oarchive_binary_t);
 
 LOAD(audio_source_component)
 {
-	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<runtime::component>(&obj)));
+	try_load(ar, cereal::make_nvp("base_type", cereal::base_class<ent::component>(&obj)));
 	try_load(ar, cereal::make_nvp("auto_play", obj.auto_play_));
 	try_load(ar, cereal::make_nvp("loop", obj.loop_));
 	try_load(ar, cereal::make_nvp("volume", obj.volume_));

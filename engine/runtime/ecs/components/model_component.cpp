@@ -71,14 +71,14 @@ const std::vector<math::transform>& model_component::get_bone_transforms() const
 	return bone_transforms_;
 }
 
-void model_component::set_bone_entities(const std::vector<runtime::entity>& bone_entities)
+void model_component::set_bone_entities(const std::vector<EntityType>& bone_entities)
 {
 	bone_entities_ = bone_entities;
 
 	touch();
 }
 
-const std::vector<runtime::entity>& model_component::get_bone_entities() const
+const std::vector<EntityType>& model_component::get_bone_entities() const
 {
 	return bone_entities_;
 }

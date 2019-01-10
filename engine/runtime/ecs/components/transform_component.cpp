@@ -290,12 +290,12 @@ bool transform_component::can_adjust_pivot() const
 	return true;
 }
 
-void transform_component::set_parent(runtime::entity parent)
+void transform_component::set_parent(EntityType parent)
 {
 	set_parent(parent, true, false);
 }
 
-bool check_parent(const runtime::entity& e, const runtime::entity& parent)
+bool check_parent(const EntityType& e, const EntityType& parent)
 {
 	if(e == parent)
 		return false;
@@ -319,7 +319,7 @@ bool check_parent(const runtime::entity& e, const runtime::entity& parent)
 	return true;
 }
 
-void transform_component::set_parent(runtime::entity parent, bool world_position_stays,
+void transform_component::set_parent(EntityType parent, bool world_position_stays,
 									 bool local_position_stays)
 {
 	// Skip if this is a no-op.
@@ -370,19 +370,19 @@ void transform_component::set_parent(runtime::entity parent, bool world_position
 	set_dirty(is_dirty());
 }
 
-const runtime::entity& transform_component::get_parent() const
+const EntityType& transform_component::get_parent() const
 {
 	return parent_;
 }
 
-void transform_component::attach_child(const runtime::entity& child)
+void transform_component::attach_child(const EntityType& child)
 {
 	children_.push_back(child);
 
 	set_dirty(is_dirty());
 }
 
-void transform_component::remove_child(const runtime::entity& child)
+void transform_component::remove_child(const EntityType& child)
 {
 	children_.erase(std::remove_if(std::begin(children_), std::end(children_),
 								   [&child](const auto& other) { return child == other; }),
@@ -502,7 +502,7 @@ void transform_component::set_dirty(bool dirty)
 	}
 }
 
-const std::vector<runtime::entity>& transform_component::get_children() const
+const std::vector<EntityType>& transform_component::get_children() const
 {
 	return children_;
 }

@@ -7,10 +7,10 @@
 
 namespace runtime
 {
-std::map<std::uint64_t, runtime::entity>& get_serialization_map()
+std::map<std::uint64_t, EntityType>& get_serialization_map()
 {
 	/// Keep count of serialized entities
-	static std::map<std::uint64_t, runtime::entity> serialization_map;
+	static std::map<std::uint64_t, EntityType> serialization_map;
 	return serialization_map;
 }
 

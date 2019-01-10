@@ -8,7 +8,7 @@ namespace runtime
 {
 void reflection_probe_system::frame_update(delta_t dt)
 {
-	ent::Registry& ecs = core::get_subsystem<ent::SpatialSystem>();
+	Registry& ecs = core::get_subsystem<SpatialSystem>();
 
 	// ecs.view<reflection_probe_component>().each(
 	// 	[](ent::EntityType e, reflection_probe_component& probe) { probe.update(); });

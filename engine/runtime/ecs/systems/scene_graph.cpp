@@ -9,7 +9,7 @@ namespace runtime
 
 void scene_graph::frame_update(delta_t dt)
 {
-	auto& ecs = core::get_subsystem<runtime::entity_component_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	roots_.clear();
 	auto all_entities = ecs.all_entities();
 	for(const auto entity : all_entities)

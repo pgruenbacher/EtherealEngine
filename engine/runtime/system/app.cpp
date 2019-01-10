@@ -66,7 +66,7 @@ void app::start(cmd_line::parser& parser)
 	core::add_subsystem<reflection_probe_system>();
 	core::add_subsystem<deferred_rendering>();
 	core::add_subsystem<audio_system>();
-	core::add_subsystem<ent::SpatialSystem>();
+	core::add_subsystem<SpatialSystem>();
 }
 
 void app::stop()

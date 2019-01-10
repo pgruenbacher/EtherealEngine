@@ -22,7 +22,7 @@ struct position {
 
 template<typename Storage>
 struct output_archive {
-    output_archive(Storage &storage, const ent::Registry& reg)
+    output_archive(Storage &storage, const Registry& reg)
         : _storage{storage}, _reg(reg)
     {}
 
@@ -42,12 +42,12 @@ struct output_archive {
 
 private:
     Storage &_storage;
-    const ent::Registry &_reg;
+    const Registry &_reg;
 };
 
 template<typename Storage>
 struct input_archive {
-    input_archive(Storage &storage, ent::Registry& reg)
+    input_archive(Storage &storage, Registry& reg)
         : _storage{storage}, _loader(reg.loader())
     {}
 
@@ -70,7 +70,7 @@ struct input_archive {
 
 private:
     Storage& _storage;
-    entt::snapshot_loader<ent::EntityType> _loader;
+    entt::snapshot_loader<EntityType> _loader;
 };
 
 template<typename Archive>

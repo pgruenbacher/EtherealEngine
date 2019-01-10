@@ -3,12 +3,12 @@
 #include <core/reflection/registration.h>
 #include <core/common/nonstd/type_index.hpp>
 
+using EntityType = entt::registry<>::entity_type;
+using Registry = entt::registry<>;
+using SpatialSystem = Registry;
 
 namespace ent {
 
-  using EntityType = entt::registry<>::entity_type;
-  using Registry = entt::registry<>;
-  using SpatialSystem = Registry;
 
   template <typename C>
   using chandle = std::weak_ptr<C>;

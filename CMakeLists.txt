@@ -25,9 +25,9 @@ endif()
 add_definitions(-DNOMINMAX)
 
 # only show first error please.
-# add_definitions(
-#     -Wfatal-errors
-#     )
+add_definitions(
+    -Wfatal-errors
+    )
 
 #enable_sanitizers("custom")
 detect_platform()

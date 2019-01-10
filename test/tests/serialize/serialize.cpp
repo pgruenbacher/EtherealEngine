@@ -22,7 +22,7 @@ struct position {
 
 template<typename Storage>
 struct output_archive {
-    output_archive(Storage &storage, ent::Registry& reg)
+    output_archive(Storage &storage, const ent::Registry& reg)
         : _storage{storage}, _reg(reg)
     {}
 
@@ -42,13 +42,13 @@ struct output_archive {
 
 private:
     Storage &_storage;
-    ent::Registry &_reg;
+    const ent::Registry &_reg;
 };
 
 template<typename Storage>
 struct input_archive {
     input_archive(Storage &storage, ent::Registry& reg)
-        : _storage{storage}, _reg(reg)
+        : _storage{storage}, _loader(reg.loader())
     {}
 
     template<typename C>
@@ -56,7 +56,7 @@ struct input_archive {
         try {
             _storage.setNextName(s);
             _storage.startNode();
-            _reg.loader().component<C>(*this);
+            _loader.component<C>(*this);
             _storage.finishNode();
         } catch (const cereal::Exception& e) {
             return;
@@ -65,13 +65,12 @@ struct input_archive {
 
     template<typename... Value>
     void operator()(Value &... value) {
-        // std::cout << "ASS " << std::endl;
         (_storage(value), ...);
     }
 
 private:
     Storage& _storage;
-    ent::Registry& _reg;
+    entt::snapshot_loader<ent::EntityType> _loader;
 };
 
 template<typename Archive>
@@ -113,7 +112,7 @@ TEST(Serialize, Basic) {
         output_archive output(json_output, source);
         output.set<position>("position");
         output.set<relationship>("relationship");
-        // output.set<timer>("timer");
+        output.set<timer>("timer");
     }
 
     std::cout << "Storag ? " << storage.str() << std::endl;
@@ -123,4 +122,8 @@ TEST(Serialize, Basic) {
     input.get<position>("position");
     input.get<timer>("timer");
     input.get<relationship>("relationship");
+
+    ASSERT_EQ(destination.view<timer>().size(), 1);
+    ASSERT_EQ(destination.view<position>().size(), 2);
+    ASSERT_EQ(destination.view<relationship>().size(), 1);
 }

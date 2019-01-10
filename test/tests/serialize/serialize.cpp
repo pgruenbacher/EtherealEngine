@@ -1,9 +1,19 @@
 #include <gtest/gtest.h>
 
+#include "runtime/ecs/components/reflection_probe_component.h"
 #include <sstream>
 #include <cereal/archives/json.hpp>
-#include "runtime/ecs/components/reflection_probe_component.h"
 
+
+
+struct timer {
+    int duration;
+    int elapsed{0};
+};
+
+struct relationship {
+    entt::registry<>::entity_type parent;
+};
 
 struct position {
     float x{0.0};
@@ -12,47 +22,56 @@ struct position {
 
 template<typename Storage>
 struct output_archive {
-    output_archive(Storage &storage)
-        : storage{storage}
+    output_archive(Storage &storage, ent::Registry& reg)
+        : _storage{storage}, _reg(reg)
     {}
 
-    template<typename... Value>
-    void operator()(const ent::EntityType ent, const Value &... value) {
-        std::cout << "ent operator " << ent << std::endl;
-        // (std::get<std::queue<Value>>(storage).push(ent));
-        // (std::get<std::queue<Value>>(storage).push(value), ...);
+    template<typename C>
+    void set(const char* s) {
+        _storage.setNextName(s);
+        _storage.startNode();
+        _reg.snapshot().component<C>(*this);
+        _storage.finishNode();
     }
 
     template<typename... Value>
     void operator()(const Value &... value) {
-        std::cout << "basic operator " << std::endl;
-        // (std::get<std::queue<Value>>(storage).push(value), ...);
+        // std::cout << "ASS " << std::endl;
+        (_storage(value), ...);
     }
 
 private:
-    Storage &storage;
+    Storage &_storage;
+    ent::Registry &_reg;
 };
 
 template<typename Storage>
 struct input_archive {
-    input_archive(Storage &storage)
-        : storage{storage}
+    input_archive(Storage &storage, ent::Registry& reg)
+        : _storage{storage}, _reg(reg)
     {}
+
+    template<typename C>
+    void get(const char* s) {
+        try {
+            _storage.setNextName(s);
+            _storage.startNode();
+            _reg.loader().component<C>(*this);
+            _storage.finishNode();
+        } catch (const cereal::Exception& e) {
+            return;
+        }
+    }
 
     template<typename... Value>
     void operator()(Value &... value) {
-        auto assign = [this](auto &value) {
-            std::cout << "assign? " << std::endl;
-            // auto &queue = std::get<std::queue<std::decay_t<decltype(value)>>>(storage);
-            // value = queue.front();
-            // queue.pop();
-        };
-
-        (assign(value), ...);
+        // std::cout << "ASS " << std::endl;
+        (_storage(value), ...);
     }
 
 private:
-    Storage &storage;
+    Storage& _storage;
+    ent::Registry& _reg;
 };
 
 template<typename Archive>
@@ -60,7 +79,17 @@ void serialize(Archive &archive, position &position) {
   archive(position.x, position.y);
 }
 
-TEST(Serialize, ReflectionProbeComponent) {
+template<typename Archive>
+void serialize(Archive &archive, timer &timer) {
+  archive(timer.duration);
+}
+
+template<typename Archive>
+void serialize(Archive &archive, relationship &relationship) {
+  archive(relationship.parent);
+}
+
+TEST(Serialize, Basic) {
 
     std::stringstream storage;
 
@@ -72,23 +101,26 @@ TEST(Serialize, ReflectionProbeComponent) {
     auto e1 = source.create();
     source.assign<position>(e1);
 
-    std::cout << "E " << e0 << " " << e1 << std::endl;
+    auto e3 = source.create();
+    source.assign<timer>(e3);
+    auto e4 = source.create();
+    source.assign<relationship>(e4, e3);
 
-
-    ASSERT_EQ(source.size(), 2);
+    ASSERT_EQ(source.size(), 4);
     {
         // output finishes flushing its contents when it goes out of scope
-        output_archive<std::stringstream> output{storage};
-        source.snapshot()
-          .component<position>(output)
-          .component<position>(output);
+        cereal::JSONOutputArchive json_output{storage};
+        output_archive output(json_output, source);
+        output.set<position>("position");
+        output.set<relationship>("relationship");
+        // output.set<timer>("timer");
     }
 
-    // std::cout << "Storag ? " << storage.str() << std::endl;
+    std::cout << "Storag ? " << storage.str() << std::endl;
 
-    input_archive<std::stringstream> input{storage};
-    destination.loader()
-        .entities(input)
-        // .destroyed(input)
-        .component<position>(input);
+    cereal::JSONInputArchive json_input{storage};
+    input_archive input(json_input, destination);
+    input.get<position>("position");
+    input.get<timer>("timer");
+    input.get<relationship>("relationship");
 }

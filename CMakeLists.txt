@@ -39,5 +39,5 @@ set_project_custom_defines()
 
 add_subdirectory_ex(engine)
 add_subdirectory_ex(editor)
-# enable_testing()
+enable_testing()
 add_subdirectory_ex(test)

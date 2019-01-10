@@ -7,6 +7,7 @@
 #include <runtime/ecs/components/audio_listener_component.h>
 #include <runtime/ecs/components/camera_component.h>
 #include <runtime/ecs/components/transform_component.h>
+#include <runtime/ecs/components/relation.h>
 #include <runtime/ecs/constructs/utils.h>
 #include <runtime/rendering/material.h>
 #include <runtime/rendering/mesh.h>
@@ -55,23 +56,24 @@ void editing_system::load_editor_camera()
 	if(!ecs::utils::try_load_entity_from_file(fs::resolve_protocol("app:/settings/editor_camera.cfg"),
 											  object))
 	{
-		auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+		auto& ecs = core::get_subsystem<SpatialSystem>();
 		object = ecs.create();
 	}
-	object.set_name("EDITOR CAMERA");
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+	ecs.assign<Name>(object, "EDITOR CAMERA");
 
-	if(!object.has_component<transform_component>())
+	if(!ecs.has<transform_component>(object))
 	{
-		auto transform_comp = object.assign<transform_component>().lock();
-		transform_comp->set_local_position({0.0f, 2.0f, -5.0f});
+		auto& transform_comp = ecs.assign<transform_component>(object);
+		transform_comp.set_local_position({0.0f, 2.0f, -5.0f});
 	}
-	if(!object.has_component<camera_component>())
+	if(!ecs.has<camera_component>(object))
 	{
-		object.assign<camera_component>();
+		ecs.assign<camera_component>(object);
 	}
-	if(!object.has_component<audio_listener_component>())
+	if(!ecs.has<audio_listener_component>(object))
 	{
-		object.assign<audio_listener_component>();
+		ecs.assign<audio_listener_component>(object);
 	}
 
 	camera = object;

@@ -10,18 +10,18 @@ namespace runtime
 {
 
 void process_node(const std::unique_ptr<mesh::armature_node>& node, const skin_bind_data& bind_data,
-				  runtime::entity& parent, std::vector<EntityType>& entity_nodes,
-				  runtime::SpatialSystem& ecs)
+				  EntityType parent, std::vector<EntityType>& entity_nodes,
+				  SpatialSystem& ecs)
 {
-	if(!parent.valid())
-		return;
+	// if(!parent.valid())
+	// 	return;
 
 	auto entity_node = ecs.create();
-	entity_node.set_name(node->name);
+	// entity_node.set_name(node->name);
 
-	auto transf_comp = entity_node.assign<transform_component>().lock();
-	transf_comp->set_parent(parent);
-	transf_comp->set_local_transform(node->local_transform);
+	auto& transf_comp = ecs.assign<transform_component>(entity_node);
+	// transf_comp->set_parent(parent);
+	transf_comp.set_local_transform(node->local_transform);
 
 	auto bone = bind_data.find_bone_by_id(node->name);
 	if(bone)
@@ -38,18 +38,22 @@ void process_node(const std::unique_ptr<mesh::armature_node>& node, const skin_b
 static std::vector<math::transform>
 get_transforms_for_bones(const std::vector<EntityType>& bone_entities)
 {
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+
 	std::vector<math::transform> result;
 	if(!bone_entities.empty())
 	{
 		result.reserve(bone_entities.size());
 		for(const auto& e : bone_entities)
 		{
-			if(e.valid())
+			// if(e.valid())
+			if (true)
 			{
-				const auto bone_transform = e.get_component<transform_component>();
-				if(!bone_transform.expired())
+				const auto& bone_transform = ecs.get<transform_component>(e);
+				// if(!bone_transform.expired())
+				if (true)
 				{
-					result.emplace_back(bone_transform.lock()->get_transform());
+					result.emplace_back(bone_transform.get_transform());
 				}
 				else
 				{
@@ -68,8 +72,8 @@ get_transforms_for_bones(const std::vector<EntityType>& bone_entities)
 
 void bone_system::frame_update(delta_t)
 {
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
-	ecs.for_each<model_component>([&ecs](EntityType e, model_component& model_comp) {
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+	ecs.view<model_component>().each([&ecs](EntityType e, auto& model_comp) {
 
 		const auto& model = model_comp.get_model();
 		auto mesh = model.get_lod(0);

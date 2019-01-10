@@ -28,12 +28,12 @@ public:
 	bool is_dirty() const;
 	// virtual void on_entity_set() override;
 	const math::transform& get_local_transform() const;
-	const math::transform& get_transform();
-	const math::vec3& get_position();
-	math::quat get_rotation();
-	math::vec3 get_x_axis();
-	math::vec3 get_y_axis();
-	math::vec3 get_z_axis();
+	const math::transform& get_transform() const;
+	const math::vec3& get_position() const;
+	math::quat get_rotation() const;
+	math::vec3 get_x_axis() const;
+	math::vec3 get_y_axis() const;
+	math::vec3 get_z_axis() const;
 
 	//-----------------------------------------------------------------------------
 	//  Name : get_scale()
@@ -41,13 +41,13 @@ public:
 	/// Retrieve the current scale of the node along its world space axes.
 	/// </summary>
 	//-----------------------------------------------------------------------------
-	math::vec3 get_scale();
-	const math::vec3& get_local_position();
-	math::quat get_local_rotation();
-	math::vec3 get_local_x_axis();
-	math::vec3 get_local_y_axis();
-	math::vec3 get_local_z_axis();
-	math::vec3 get_local_scale();
+	math::vec3 get_scale() const;
+	const math::vec3& get_local_position() const;
+	math::quat get_local_rotation() const;
+	math::vec3 get_local_x_axis() const;
+	math::vec3 get_local_y_axis() const;
+	math::vec3 get_local_z_axis() const;
+	math::vec3 get_local_scale() const;
 	void look_at(float x, float y, float z);
 	void look_at(const math::vec3& point);
 	void set_position(const math::vec3& position);

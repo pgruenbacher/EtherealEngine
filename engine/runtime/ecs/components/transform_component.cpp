@@ -85,70 +85,70 @@ void transform_component::set_position(const math::vec3& position)
 	apply_transform(m);
 }
 
-math::vec3 transform_component::get_local_scale()
+math::vec3 transform_component::get_local_scale() const
 {
 	return local_transform_.get_scale();
 }
 
-const math::vec3& transform_component::get_local_position()
+const math::vec3& transform_component::get_local_position() const
 {
 	return local_transform_.get_position();
 }
 
-math::quat transform_component::get_local_rotation()
+math::quat transform_component::get_local_rotation() const
 {
 	return local_transform_.get_rotation();
 }
 
-math::vec3 transform_component::get_local_x_axis()
+math::vec3 transform_component::get_local_x_axis() const
 {
 	return local_transform_.x_unit_axis();
 }
 
-math::vec3 transform_component::get_local_y_axis()
+math::vec3 transform_component::get_local_y_axis() const
 {
 	return local_transform_.y_unit_axis();
 }
 
-math::vec3 transform_component::get_local_z_axis()
+math::vec3 transform_component::get_local_z_axis() const
 {
 	return local_transform_.z_unit_axis();
 }
 
-const math::vec3& transform_component::get_position()
+const math::vec3& transform_component::get_position() const
 {
 	return get_transform().get_position();
 }
 
-math::quat transform_component::get_rotation()
+math::quat transform_component::get_rotation() const
 {
 	return get_transform().get_rotation();
 }
 
-math::vec3 transform_component::get_x_axis()
+math::vec3 transform_component::get_x_axis() const
 {
 	return get_transform().x_unit_axis();
 }
 
-math::vec3 transform_component::get_y_axis()
+math::vec3 transform_component::get_y_axis() const
 {
 	return get_transform().y_unit_axis();
 }
 
-math::vec3 transform_component::get_z_axis()
+math::vec3 transform_component::get_z_axis() const
 {
 	return get_transform().z_unit_axis();
 }
 
-math::vec3 transform_component::get_scale()
+math::vec3 transform_component::get_scale() const
 {
 	return get_transform().get_scale();
 }
 
-const math::transform& transform_component::get_transform()
+const math::transform& transform_component::get_transform() const
 {
 	// the transform should be resolved
-	resolve();
+	// resolve();
 	return world_transform_;
 }
 
@@ -452,8 +452,8 @@ void transform_component::set_local_transform(const math::transform& trans)
 
 void transform_component::resolve(bool force)
 {
-	if(force || is_dirty())
-	{
+	// if(force || is_dirty())
+	// {
 		// if(parent_.valid())
 		// {
 		// 	auto parent_transform = parent_.get_component<transform_component>().lock();
@@ -471,8 +471,8 @@ void transform_component::resolve(bool force)
 		// 	world_transform_ = local_transform_;
 		// }
 
-		set_dirty(false);
-	}
+	// 	set_dirty(false);
+	// }
 }
 
 bool transform_component::is_dirty() const

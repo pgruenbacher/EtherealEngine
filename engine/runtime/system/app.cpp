@@ -3,7 +3,7 @@
 #include "events.h"
 
 #include "../assets/asset_manager.h"
-#include "../ecs/ecs.h"
+#include "../ecs/ent.h"
 #include "../ecs/systems/audio_system.h"
 #include "../ecs/systems/bone_system.h"
 #include "../ecs/systems/camera_system.h"
@@ -59,7 +59,6 @@ void app::start(cmd_line::parser& parser)
 	core::add_subsystem<asset_manager>();
 	core::add_subsystem<core::task_system>(false);
 	setup_asset_manager();
-	core::add_subsystem<SpatialSystem>();
 	core::add_subsystem<scene_graph>();
 	core::add_subsystem<bone_system>();
 	core::add_subsystem<camera_system>();

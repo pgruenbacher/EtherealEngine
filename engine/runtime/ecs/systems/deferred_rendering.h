@@ -31,7 +31,7 @@ struct lod_data
 };
 
 using visibility_set_models_t =
-	std::vector<std::tuple<entity, chandle<transform_component>, chandle<model_component>>>;
+	std::vector<EntityType>;
 
 class deferred_rendering
 {
@@ -67,7 +67,7 @@ public:
 	///
 	/// </summary>
 	//-----------------------------------------------------------------------------
-	void receive(entity e);
+	void receive(Registry& reg, EntityType e);
 
 	//-----------------------------------------------------------------------------
 	//  Name : build_reflections ()
@@ -109,7 +109,7 @@ public:
 	//-----------------------------------------------------------------------------
 	std::shared_ptr<gfx::frame_buffer> deferred_render_full(camera& camera, gfx::render_view& render_view,
 															SpatialSystem& ecs,
-															std::unordered_map<entity, lod_data>& camera_lods,
+															std::unordered_map<EntityType, lod_data>& camera_lods,
 															delta_t dt);
 
 	//-----------------------------------------------------------------------------
@@ -123,7 +123,7 @@ public:
 	std::shared_ptr<gfx::frame_buffer> g_buffer_pass(std::shared_ptr<gfx::frame_buffer> input, camera& camera,
 													 gfx::render_view& render_view,
 													 visibility_set_models_t& visibility_set,
-													 std::unordered_map<entity, lod_data>& camera_lods,
+													 std::unordered_map<EntityType, lod_data>& camera_lods,
 													 delta_t dt);
 
 	//-----------------------------------------------------------------------------
@@ -174,7 +174,7 @@ public:
 														camera& camera, gfx::render_view& render_view);
 
 private:
-	std::unordered_map<entity, std::unordered_map<entity, lod_data>> lod_data_;
+	std::unordered_map<EntityType, std::unordered_map<EntityType, lod_data>> lod_data_;
 	/// Program that is responsible for rendering.
 	std::unique_ptr<gpu_program> directional_light_program_;
 	/// Program that is responsible for rendering.

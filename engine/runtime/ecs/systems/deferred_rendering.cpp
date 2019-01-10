@@ -72,17 +72,22 @@ bool should_rebuild_reflections(visibility_set_models_t& visibility_set, const r
 	if(probe.method == reflect_method::environment)
 		return false;
 
-	for(auto& element : visibility_set)
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+	for(auto e : visibility_set)
 	{
-		auto& transform_comp_handle = std::get<1>(element);
-		auto& model_comp_handle = std::get<2>(element);
-		auto transform_comp_ptr = transform_comp_handle.lock();
-		auto model_comp_ptr = model_comp_handle.lock();
-		if(!transform_comp_ptr || !model_comp_ptr)
-			continue;
+		// auto& transform_comp_handle = std::get<1>(element);
+		// auto& model_comp_handle = std::get<2>(element);
+		// auto transform_comp_ptr = transform_comp_handle.lock();
+		// auto model_comp_ptr = model_comp_handle.lock();
+		// if(!transform_comp_ptr || !model_comp_ptr)
+		// 	continue;
 
-		auto& transform_comp_ref = *transform_comp_ptr.get();
-		auto& model_comp_ref = *model_comp_ptr.get();
+		// auto& transform_comp_ref = *transform_comp_ptr.get();
+		// auto& model_comp_ref = *model_comp_ptr.get();
+		// auto& transform_comp_ref = *transform_comp_ptr.get();
+		// auto& model_comp_ref = *model_comp_ptr.get();
+		const auto& transform_comp_ref = ecs.get<transform_component>(e);
+		const auto& model_comp_ref = ecs.get<model_component>(e);
 
 		const auto& model = model_comp_ref.get_model();
 		if(!model.is_valid())
@@ -147,31 +152,31 @@ bool should_rebuild_shadows(visibility_set_models_t& visibility_set, const light
 	return false;
 }
 
-visibility_set_models_t deferred_rendering::gather_visible_models(entity_component_system& ecs,
+visibility_set_models_t deferred_rendering::gather_visible_models(SpatialSystem& ecs,
 																  camera* camera,
 																  bool dirty_only /* = false*/,
 																  bool static_only /*= true*/,
 																  bool require_reflection_caster /*= false*/)
 {
 	visibility_set_models_t result;
-	chandle<transform_component> transform_comp_handle;
-	chandle<model_component> model_comp_handle;
-	for(auto entity : ecs.entities_with_components(transform_comp_handle, model_comp_handle))
+	// chandle<transform_component> transform_comp_handle;
+	// chandle<model_component> model_comp_handle;
+	for(EntityType ent : ecs.view<transform_component, model_component>())
 	{
-		auto model_comp_ptr = model_comp_handle.lock();
-		auto transform_comp_ptr = transform_comp_handle.lock();
+		const auto& model_comp_ref = ecs.get<model_component>(ent);
+		const auto& transform_comp_ref = ecs.get<transform_component>(ent);
 
-		if(static_only && !model_comp_ptr->is_static())
+		if(static_only && !model_comp_ref.is_static())
 		{
 			continue;
 		}
 
-		if(require_reflection_caster && !model_comp_ptr->casts_reflection())
+		if(require_reflection_caster && !model_comp_ref.casts_reflection())
 		{
 			continue;
 		}
 
-		auto mesh = model_comp_ptr->get_model().get_lod(0);
+		auto mesh = model_comp_ref.get_model().get_lod(0);
 
 		// If mesh isnt loaded yet skip it.
 		if(!mesh)
@@ -181,7 +186,7 @@ visibility_set_models_t deferred_rendering::gather_visible_models(entity_compone
 		{
 			const auto& frustum = camera->get_frustum();
 
-			const auto& world_transform = transform_comp_ptr->get_transform();
+			const auto& world_transform = transform_comp_ref.get_transform();
 
 			const auto& bounds = mesh->get_bounds();
 
@@ -191,14 +196,14 @@ visibility_set_models_t deferred_rendering::gather_visible_models(entity_compone
 				// Only dirty mesh components.
 				if(dirty_only)
 				{
-					if(transform_comp_ptr->is_touched() || model_comp_ptr->is_touched())
+					if(transform_comp_ref.is_touched() || model_comp_ref.is_touched())
 					{
-						result.emplace_back(entity, transform_comp_handle, model_comp_handle);
+						result.emplace_back(ent);
 					}
 				} // End if dirty_only
 				else
 				{
-					result.emplace_back(std::make_tuple(entity, transform_comp_handle, model_comp_handle));
+					result.emplace_back(ent);
 				}
 
 			} // Enf if visble
@@ -208,14 +213,14 @@ visibility_set_models_t deferred_rendering::gather_visible_models(entity_compone
 			// Only dirty mesh components.
 			if(dirty_only)
 			{
-				if(transform_comp_ptr->is_touched() || model_comp_ptr->is_touched())
+				if(transform_comp_ref.is_touched() || model_comp_ref.is_touched())
 				{
-					result.emplace_back(std::make_tuple(entity, transform_comp_handle, model_comp_handle));
+					result.emplace_back(ent);
 				}
 			} // End if dirty_only
 			else
 			{
-				result.emplace_back(std::make_tuple(entity, transform_comp_handle, model_comp_handle));
+				result.emplace_back(ent);
 			}
 		}
 	}
@@ -224,71 +229,71 @@ visibility_set_models_t deferred_rendering::gather_visible_models(entity_compone
 
 void deferred_rendering::frame_render(std::chrono::duration<float> dt)
 {
-	auto& ecs = core::get_subsystem<entity_component_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 
 	build_reflections_pass(ecs, dt);
 	build_shadows_pass(ecs, dt);
 	camera_pass(ecs, dt);
 }
 
-void deferred_rendering::build_reflections_pass(entity_component_system& ecs, std::chrono::duration<float> dt)
+void deferred_rendering::build_reflections_pass(SpatialSystem& ecs, std::chrono::duration<float> dt)
 {
 	auto dirty_models = gather_visible_models(ecs, nullptr, true, true, true);
-	// ecs.for_each<transform_component, reflection_probe_component>(
-	// 	[this, &ecs, dt, &dirty_models](entity ce, transform_component& transform_comp,
-	// 									reflection_probe_component& reflection_probe_comp) {
-	// 		const auto& world_tranform = transform_comp.get_transform();
-	// 		const auto& probe = reflection_probe_comp.get_probe();
+	ecs.view<transform_component, reflection_probe_component>().each(
+		[this, &ecs, dt, &dirty_models](EntityType ce, auto& transform_comp,
+										auto& reflection_probe_comp) {
+			const auto& world_tranform = transform_comp.get_transform();
+			const auto& probe = reflection_probe_comp.get_probe();
 
-	// 		auto cubemap_fbo = reflection_probe_comp.get_cubemap_fbo();
-	// 		bool should_rebuild = true;
+			auto cubemap_fbo = reflection_probe_comp.get_cubemap_fbo();
+			bool should_rebuild = true;
 
-	// 		if(!transform_comp.is_touched() && !reflection_probe_comp.is_touched())
-	// 		{
-	// 			// If reflections shouldn't be rebuilt - continue.
-	// 			should_rebuild = should_rebuild_reflections(dirty_models, probe);
-	// 		}
+			if(!transform_comp.is_touched() && !reflection_probe_comp.is_touched())
+			{
+				// If reflections shouldn't be rebuilt - continue.
+				should_rebuild = should_rebuild_reflections(dirty_models, probe);
+			}
 
-	// 		if(!should_rebuild)
-	// 			return;
+			if(!should_rebuild)
+				return;
 
-	// 		// iterate trough each cube face
-	// 		for(std::uint32_t i = 0; i < 6; ++i)
-	// 		{
-	// 			auto camera = camera::get_face_camera(i, world_tranform);
-	// 			camera.set_far_clip(reflection_probe_comp.get_probe().box_data.extents.r);
-	// 			auto& render_view = reflection_probe_comp.get_render_view(i);
-	// 			camera.set_viewport_size(usize32_t(cubemap_fbo->get_size()));
-	// 			auto& camera_lods = lod_data_[ce];
-	// 			visibility_set_models_t visibility_set;
+			// iterate trough each cube face
+			for(std::uint32_t i = 0; i < 6; ++i)
+			{
+				auto camera = camera::get_face_camera(i, world_tranform);
+				camera.set_far_clip(reflection_probe_comp.get_probe().box_data.extents.r);
+				auto& render_view = reflection_probe_comp.get_render_view(i);
+				camera.set_viewport_size(usize32_t(cubemap_fbo->get_size()));
+				auto& camera_lods = lod_data_[ce];
+				visibility_set_models_t visibility_set;
 
-	// 			if(probe.method != reflect_method::environment)
-	// 				visibility_set = gather_visible_models(ecs, &camera, !should_rebuild, true, true);
+				if(probe.method != reflect_method::environment)
+					visibility_set = gather_visible_models(ecs, &camera, !should_rebuild, true, true);
 
-	// 			std::shared_ptr<gfx::frame_buffer> output = nullptr;
-	// 			output = g_buffer_pass(output, camera, render_view, visibility_set, camera_lods, dt);
-	// 			output = lighting_pass(output, camera, render_view, ecs, dt);
-	// 			output = atmospherics_pass(output, camera, render_view, ecs, dt);
-	// 			output = tonemapping_pass(output, camera, render_view);
+				std::shared_ptr<gfx::frame_buffer> output = nullptr;
+				output = g_buffer_pass(output, camera, render_view, visibility_set, camera_lods, dt);
+				output = lighting_pass(output, camera, render_view, ecs, dt);
+				output = atmospherics_pass(output, camera, render_view, ecs, dt);
+				output = tonemapping_pass(output, camera, render_view);
 
-	// 			gfx::render_pass pass("cubemap_fill");
-	// 			pass.touch();
-	// 			gfx::blit(pass.id, cubemap_fbo->get_texture()->native_handle(), 0, 0, 0, std::uint16_t(i),
-	// 					  output->get_texture()->native_handle());
-	// 		}
+				gfx::render_pass pass("cubemap_fill");
+				pass.touch();
+				gfx::blit(pass.id, cubemap_fbo->get_texture()->native_handle(), 0, 0, 0, std::uint16_t(i),
+						  output->get_texture()->native_handle());
+			}
 
-	// 		gfx::render_pass pass("cubemap_generate_mips");
-	// 		pass.bind(cubemap_fbo.get());
-	// 		pass.touch();
-	// 	});
+			gfx::render_pass pass("cubemap_generate_mips");
+			pass.bind(cubemap_fbo.get());
+			pass.touch();
+		});
 }
 
-void deferred_rendering::build_shadows_pass(entity_component_system& ecs, std::chrono::duration<float> dt)
+void deferred_rendering::build_shadows_pass(SpatialSystem& ecs, std::chrono::duration<float> dt)
 {
 	auto dirty_models = gather_visible_models(ecs, nullptr, true, true, true);
-	ecs.for_each<transform_component, light_component>(
-		[this, &ecs, dt, &dirty_models](entity ce, transform_component& transform_comp,
-										light_component& light_comp) {
+	ecs.view<transform_component, light_component>().each(
+		[this, &ecs, dt, &dirty_models](EntityType ce, auto& transform_comp,
+										auto& light_comp) {
 			// const auto& world_tranform = transform_comp.get_transform();
 			const auto& light = light_comp.get_light();
 
@@ -306,9 +311,9 @@ void deferred_rendering::build_shadows_pass(entity_component_system& ecs, std::c
 		});
 }
 
-void deferred_rendering::camera_pass(entity_component_system& ecs, std::chrono::duration<float> dt)
+void deferred_rendering::camera_pass(SpatialSystem& ecs, std::chrono::duration<float> dt)
 {
-	ecs.for_each<camera_component>([this, &ecs, dt](entity ce, camera_component& camera_comp) {
+	ecs.view<camera_component>().each([this, &ecs, dt](EntityType ce, auto& camera_comp) {
 		auto& camera_lods = lod_data_[ce];
 		auto& camera = camera_comp.get_camera();
 		auto& render_view = camera_comp.get_render_view();
@@ -318,8 +323,8 @@ void deferred_rendering::camera_pass(entity_component_system& ecs, std::chrono::
 }
 
 std::shared_ptr<gfx::frame_buffer> deferred_rendering::deferred_render_full(
-	camera& camera, gfx::render_view& render_view, entity_component_system& ecs,
-	std::unordered_map<entity, lod_data>& camera_lods, std::chrono::duration<float> dt)
+	camera& camera, gfx::render_view& render_view, SpatialSystem& ecs,
+	std::unordered_map<EntityType, lod_data>& camera_lods, std::chrono::duration<float> dt)
 {
 	std::shared_ptr<gfx::frame_buffer> output = nullptr;
 
@@ -341,9 +346,10 @@ std::shared_ptr<gfx::frame_buffer> deferred_rendering::deferred_render_full(
 std::shared_ptr<gfx::frame_buffer>
 deferred_rendering::g_buffer_pass(std::shared_ptr<gfx::frame_buffer> input, camera& camera,
 								  gfx::render_view& render_view, visibility_set_models_t& visibility_set,
-								  std::unordered_map<entity, lod_data>& camera_lods,
+								  std::unordered_map<EntityType, lod_data>& camera_lods,
 								  std::chrono::duration<float> dt)
 {
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	const auto& view = camera.get_view();
 	const auto& proj = camera.get_projection();
 	const auto& viewport_size = camera.get_viewport_size();
@@ -353,18 +359,20 @@ deferred_rendering::g_buffer_pass(std::shared_ptr<gfx::frame_buffer> input, came
 	pass.set_view_proj(view, proj);
 	pass.bind(g_buffer_fbo.get());
 
-	for(auto& element : visibility_set)
+	for(auto e : visibility_set)
 	{
-		auto& e = std::get<0>(element);
-		auto& transform_comp_handle = std::get<1>(element);
-		auto& model_comp_handle = std::get<2>(element);
-		auto transform_comp_ptr = transform_comp_handle.lock();
-		auto model_comp_ptr = model_comp_handle.lock();
-		if(!transform_comp_ptr || !model_comp_ptr)
-			continue;
+		const auto& transform_comp_ref = ecs.get<transform_component>(e);
+		const auto& model_comp_ref = ecs.get<model_component>(e);
+		// auto& e = std::get<0>(element);
+		// auto& transform_comp_handle = std::get<1>(element);
+		// auto& model_comp_handle = std::get<2>(element);
+		// auto transform_comp_ptr = transform_comp_handle.lock();
+		// auto model_comp_ptr = model_comp_handle.lock();
+		// if(!transform_comp_ptr || !model_comp_ptr)
+		// 	continue;
 
-		auto& transform_comp_ref = *transform_comp_ptr.get();
-		auto& model_comp_ref = *model_comp_ptr.get();
+		// auto& transform_comp_ref = *transform_comp_ptr.get();
+		// auto& model_comp_ref = *model_comp_ptr.get();
 
 		const auto& model = model_comp_ref.get_model();
 		if(!model.is_valid())
@@ -416,7 +424,7 @@ deferred_rendering::g_buffer_pass(std::shared_ptr<gfx::frame_buffer> input, came
 std::shared_ptr<gfx::frame_buffer> deferred_rendering::lighting_pass(std::shared_ptr<gfx::frame_buffer> input,
 																	 camera& camera,
 																	 gfx::render_view& render_view,
-																	 entity_component_system& ecs,
+																	 SpatialSystem& ecs,
 																	 std::chrono::duration<float> dt)
 {
 	const auto& view = camera.get_view();
@@ -444,9 +452,11 @@ std::shared_ptr<gfx::frame_buffer> deferred_rendering::lighting_pass(std::shared
 			.get_texture("RBUFFER", viewport_size.width, viewport_size.height, false, 1, light_buffer_format)
 			.get();
 
-	ecs.for_each<transform_component, light_component>(
-		[this, &camera, &pass, &buffer_size, &view, &proj, g_buffer_fbo,
-		 refl_buffer](entity e, transform_component& transform_comp_ref, light_component& light_comp_ref) {
+	ecs.view<transform_component, light_component>().each(
+		[
+			this, &camera, &pass, &buffer_size, &view, &proj, g_buffer_fbo,
+		 refl_buffer
+		](EntityType e, auto& transform_comp_ref, auto& light_comp_ref) {
 			const auto& light = light_comp_ref.get_light();
 			const auto& world_transform = transform_comp_ref.get_transform();
 			const auto& light_position = world_transform.get_position();
@@ -522,7 +532,7 @@ std::shared_ptr<gfx::frame_buffer> deferred_rendering::lighting_pass(std::shared
 
 std::shared_ptr<gfx::frame_buffer>
 deferred_rendering::reflection_probe_pass(std::shared_ptr<gfx::frame_buffer> input, camera& camera,
-										  gfx::render_view& render_view, entity_component_system& ecs,
+										  gfx::render_view& render_view, SpatialSystem& ecs,
 										  std::chrono::duration<float> dt)
 {
 	const auto& view = camera.get_view();
@@ -545,82 +555,82 @@ deferred_rendering::reflection_probe_pass(std::shared_ptr<gfx::frame_buffer> inp
 	pass.bind(r_buffer_fbo.get());
 	pass.set_view_proj(view, proj);
 	pass.clear(BGFX_CLEAR_COLOR, 0, 0.0f, 0);
-	// ecs.for_each<transform_component, reflection_probe_component>(
-	// 	[this, &camera, &pass, &buffer_size, &view, &proj, g_buffer_fbo](
-	// 		entity e, transform_component& transform_comp_ref, reflection_probe_component& probe_comp_ref) {
-	// 		const auto& probe = probe_comp_ref.get_probe();
-	// 		const auto& world_transform = transform_comp_ref.get_transform();
-	// 		const auto& probe_position = world_transform.get_position();
+	ecs.view<transform_component, reflection_probe_component>().each(
+		[this, &camera, &pass, &buffer_size, &view, &proj, g_buffer_fbo](
+			EntityType e, auto& transform_comp_ref, auto& probe_comp_ref) {
+			const auto& probe = probe_comp_ref.get_probe();
+			const auto& world_transform = transform_comp_ref.get_transform();
+			const auto& probe_position = world_transform.get_position();
 
-	// 		irect32_t rect(0, 0, irect32_t::value_type(buffer_size.width),
-	// 					   irect32_t::value_type(buffer_size.height));
-	// 		if(probe_comp_ref.compute_projected_sphere_rect(rect, probe_position, view, proj) == 0)
-	// 			return;
+			irect32_t rect(0, 0, irect32_t::value_type(buffer_size.width),
+						   irect32_t::value_type(buffer_size.height));
+			if(probe_comp_ref.compute_projected_sphere_rect(rect, probe_position, view, proj) == 0)
+				return;
 
-	// 		const auto cubemap = probe_comp_ref.get_cubemap();
+			const auto cubemap = probe_comp_ref.get_cubemap();
 
-	// 		gpu_program* program = nullptr;
-	// 		float influence_radius = 0.0f;
-	// 		if(probe.type == probe_type::sphere && sphere_ref_probe_program_)
-	// 		{
-	// 			program = sphere_ref_probe_program_.get();
-	// 			program->begin();
-	// 			influence_radius = probe.sphere_data.range;
-	// 		}
+			gpu_program* program = nullptr;
+			float influence_radius = 0.0f;
+			if(probe.type == probe_type::sphere && sphere_ref_probe_program_)
+			{
+				program = sphere_ref_probe_program_.get();
+				program->begin();
+				influence_radius = probe.sphere_data.range;
+			}
 
-	// 		if(probe.type == probe_type::box && box_ref_probe_program_)
-	// 		{
-	// 			math::transform t;
-	// 			t.set_scale(probe.box_data.extents);
-	// 			t = world_transform * t;
-	// 			auto u_inv_world = math::inverse(t).get_matrix();
-	// 			float data2[4] = {probe.box_data.extents.x, probe.box_data.extents.y,
-	// 							  probe.box_data.extents.z, probe.box_data.transition_distance};
+			if(probe.type == probe_type::box && box_ref_probe_program_)
+			{
+				math::transform t;
+				t.set_scale(probe.box_data.extents);
+				t = world_transform * t;
+				auto u_inv_world = math::inverse(t).get_matrix();
+				float data2[4] = {probe.box_data.extents.x, probe.box_data.extents.y,
+								  probe.box_data.extents.z, probe.box_data.transition_distance};
 
-	// 			program = box_ref_probe_program_.get();
-	// 			program->begin();
-	// 			program->set_uniform("u_inv_world", math::value_ptr(u_inv_world));
-	// 			program->set_uniform("u_data2", data2);
+				program = box_ref_probe_program_.get();
+				program->begin();
+				program->set_uniform("u_inv_world", math::value_ptr(u_inv_world));
+				program->set_uniform("u_data2", data2);
 
-	// 			influence_radius = math::length(t.get_scale() + probe.box_data.transition_distance);
-	// 		}
+				influence_radius = math::length(t.get_scale() + probe.box_data.transition_distance);
+			}
 
-	// 		if(program)
-	// 		{
-	// 			float mips = cubemap ? float(cubemap->info.numMips) : 1.0f;
-	// 			float data0[4] = {
-	// 				probe_position.x,
-	// 				probe_position.y,
-	// 				probe_position.z,
-	// 				influence_radius,
-	// 			};
+			if(program)
+			{
+				float mips = cubemap ? float(cubemap->info.numMips) : 1.0f;
+				float data0[4] = {
+					probe_position.x,
+					probe_position.y,
+					probe_position.z,
+					influence_radius,
+				};
 
-	// 			float data1[4] = {mips, 0.0f, 0.0f, 0.0f};
+				float data1[4] = {mips, 0.0f, 0.0f, 0.0f};
 
-	// 			program->set_uniform("u_data0", data0);
-	// 			program->set_uniform("u_data1", data1);
+				program->set_uniform("u_data0", data0);
+				program->set_uniform("u_data1", data1);
 
-	// 			program->set_texture(0, "s_tex0", g_buffer_fbo->get_texture(0).get());
-	// 			program->set_texture(1, "s_tex1", g_buffer_fbo->get_texture(1).get());
-	// 			program->set_texture(2, "s_tex2", g_buffer_fbo->get_texture(2).get());
-	// 			program->set_texture(3, "s_tex3", g_buffer_fbo->get_texture(3).get());
-	// 			program->set_texture(4, "s_tex4", g_buffer_fbo->get_texture(4).get());
-	// 			program->set_texture(5, "s_tex_cube", cubemap.get());
-	// 			gfx::set_scissor(rect.left, rect.top, rect.width(), rect.height());
-	// 			auto topology = gfx::clip_quad(1.0f);
-	// 			gfx::set_state(topology | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_BLEND_ALPHA);
-	// 			gfx::submit(pass.id, program->native_handle());
-	// 			gfx::set_state(BGFX_STATE_DEFAULT);
-	// 			program->end();
-	// 		}
-	// 	});
+				program->set_texture(0, "s_tex0", g_buffer_fbo->get_texture(0).get());
+				program->set_texture(1, "s_tex1", g_buffer_fbo->get_texture(1).get());
+				program->set_texture(2, "s_tex2", g_buffer_fbo->get_texture(2).get());
+				program->set_texture(3, "s_tex3", g_buffer_fbo->get_texture(3).get());
+				program->set_texture(4, "s_tex4", g_buffer_fbo->get_texture(4).get());
+				program->set_texture(5, "s_tex_cube", cubemap.get());
+				gfx::set_scissor(rect.left, rect.top, rect.width(), rect.height());
+				auto topology = gfx::clip_quad(1.0f);
+				gfx::set_state(topology | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_BLEND_ALPHA);
+				gfx::submit(pass.id, program->native_handle());
+				gfx::set_state(BGFX_STATE_DEFAULT);
+				program->end();
+			}
+		});
 
 	return r_buffer_fbo;
 }
 
 std::shared_ptr<gfx::frame_buffer>
 deferred_rendering::atmospherics_pass(std::shared_ptr<gfx::frame_buffer> input, camera& camera,
-									  gfx::render_view& render_view, entity_component_system& ecs,
+									  gfx::render_view& render_view, SpatialSystem& ecs,
 									  std::chrono::duration<float> dt)
 {
 	auto far_clip_cache = camera.get_far_clip();
@@ -649,9 +659,9 @@ deferred_rendering::atmospherics_pass(std::shared_ptr<gfx::frame_buffer> input, 
 	{
 		bool found_sun = false;
 		auto light_direction = math::normalize(math::vec3(0.2f, -0.8f, 1.0f));
-		ecs.for_each<transform_component, light_component>(
-			[&light_direction, &found_sun](entity e, transform_component& transform_comp_ref,
-										   light_component& light_comp_ref) {
+		ecs.view<transform_component, light_component>().each(
+			[&light_direction, &found_sun](EntityType e, auto& transform_comp_ref,
+										   auto& light_comp_ref) {
 				if(found_sun)
 				{
 					return;
@@ -717,7 +727,7 @@ deferred_rendering::tonemapping_pass(std::shared_ptr<gfx::frame_buffer> input, c
 	return surface;
 }
 
-void deferred_rendering::receive(entity e)
+void deferred_rendering::receive(Registry& reg, EntityType e)
 {
 	lod_data_.erase(e);
 	for(auto& pair : lod_data_)
@@ -727,7 +737,8 @@ void deferred_rendering::receive(entity e)
 }
 deferred_rendering::deferred_rendering()
 {
-	on_entity_destroyed.connect(this, &deferred_rendering::receive);
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+	ecs.destruction<model_component>().connect<&deferred_rendering::receive>(this);
 	on_frame_render.connect(this, &deferred_rendering::frame_render);
 
 	auto& ts = core::get_subsystem<core::task_system>();
@@ -804,7 +815,8 @@ deferred_rendering::deferred_rendering()
 
 deferred_rendering::~deferred_rendering()
 {
-	on_entity_destroyed.disconnect(this, &deferred_rendering::receive);
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+	ecs.destruction<model_component>().disconnect<&deferred_rendering::receive>(this);
 	on_frame_render.disconnect(this, &deferred_rendering::frame_render);
 }
 }

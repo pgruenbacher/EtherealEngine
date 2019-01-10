@@ -28,22 +28,22 @@ void picking_system::frame_render(delta_t dt)
 	auto& es = core::get_subsystem<editing_system>();
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& renderer = core::get_subsystem<runtime::renderer>();
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 
 	const auto render_frame = renderer.get_render_frame();
 
 	if(input.is_mouse_button_pressed(mml::mouse::left))
 	{
-		auto& editor_camera = es.camera;
+		EntityType editor_camera = es.camera;
 		if(imguizmo::is_over() && es.selection_data.object)
 			return;
 
-		if(!editor_camera || !editor_camera.has_component<camera_component>())
+		if(!editor_camera || !ecs.has<camera_component>(editor_camera))
 			return;
 
-		auto camera_comp = editor_camera.get_component<camera_component>();
-		auto camera_comp_ptr = camera_comp.lock().get();
-		const auto& current_camera = camera_comp_ptr->get_camera();
+		auto& camera_comp = ecs.get<camera_component>(editor_camera);
+		// auto camera_comp_ptr = camera_comp.lock().get();
+		const auto& current_camera = camera_comp.get_camera();
 		const auto near_clip = current_camera.get_near_clip();
 		const auto far_clip = current_camera.get_far_clip();
 		const auto& mouse_pos = input.get_current_cursor_position();
@@ -81,9 +81,9 @@ void picking_system::frame_render(delta_t dt)
 		pass.set_view_proj(pick_view, pick_proj);
 		pass.bind(surface_.get());
 
-		ecs.for_each<transform_component, model_component>(
-			[this, &pass, &pick_frustum](EntityType e, transform_component& transform_comp_ref,
-										 model_component& model_comp_ref) {
+		ecs.view<transform_component, model_component>().each(
+			[this, &pass, &pick_frustum](EntityType e, auto& transform_comp_ref,
+										 auto& model_comp_ref) {
 				auto& model = model_comp_ref.get_model();
 				if(!model.is_valid())
 					return;
@@ -100,7 +100,8 @@ void picking_system::frame_render(delta_t dt)
 				if(!math::frustum::test_obb(pick_frustum, bounds, world_transform))
 					return;
 
-				auto entity_index = e.id().index();
+				// auto entity_index = e.id().index();
+				uint32_t entity_index = e;
 				std::uint32_t rr = (entity_index)&0xff;
 				std::uint32_t gg = (entity_index >> 8) & 0xff;
 				std::uint32_t bb = (entity_index >> 16) & 0xff;
@@ -178,7 +179,8 @@ void picking_system::frame_render(delta_t dt)
 				if(pair.second == max_amount)
 				{
 					id_key = pair.first;
-					if(ecs.valid_index(id_key))
+					// if(ecs.valid_index(id_key))
+					if (true)
 					{
 						auto eid = ecs.create_id(id_key);
 						auto picked_entity = ecs.get(eid);

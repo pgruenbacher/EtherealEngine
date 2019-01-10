@@ -11,8 +11,8 @@ void camera_system::frame_update(delta_t)
 {
 	auto& ecs = core::get_subsystem<SpatialSystem>();
 
-	ecs.for_each<transform_component, camera_component>(
-		[](entity e, transform_component& transform, camera_component& camera) {
+	ecs.view<transform_component, camera_component>().each(
+		[](EntityType e, auto& transform, auto& camera) {
 			camera.update(transform.get_transform());
 		});
 }

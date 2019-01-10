@@ -17,7 +17,8 @@ std::map<std::uint64_t, EntityType>& get_serialization_map()
 SAVE(EntityType)
 {
  // TODO check for validity
-  cereal(obj);
+  // cereal::process(obj);
+  ar(obj);
  // auto id = obj.id().id();
  // try_save(ar, cereal::make_nvp("entity_id", id));
 
@@ -39,7 +40,7 @@ SAVE_INSTANTIATE(EntityType, cereal::oarchive_binary_t);
 
 LOAD(EntityType)
 {
-    cereal(obj);
+    ar(obj);
  // std::uint64_t id = 0;
  // std::string name;
  // std::vector<chandle<component>> components;

@@ -23,6 +23,7 @@
 #include <runtime/ecs/components/model_component.h>
 #include <runtime/ecs/components/reflection_probe_component.h>
 #include <runtime/ecs/components/transform_component.h>
+#include <runtime/ecs/components/relation.h>
 #include <runtime/ecs/constructs/scene.h>
 #include <runtime/ecs/constructs/utils.h>
 #include <runtime/ecs/systems/scene_graph.h>
@@ -54,8 +55,10 @@ void create_window_with_dock(const std::string& dock_name)
 	rend.register_window(std::move(window));
 	docking.register_dock(std::move(dock));
 }
+
 std::vector<EntityType> gather_scene_data()
 {
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& sg = core::get_subsystem<runtime::scene_graph>();
 	const auto& roots = sg.get_roots();
@@ -63,8 +66,9 @@ std::vector<EntityType> gather_scene_data()
 	std::vector<EntityType> entities;
 	for(auto root : roots)
 	{
-		if(root.valid() && root != editor_camera)
+		if (ecs.valid(root) && root != editor_camera) {
 			entities.push_back(root);
+		}
 	}
 
 	return entities;
@@ -73,32 +77,32 @@ std::vector<EntityType> gather_scene_data()
 void default_scene()
 {
 	auto& am = core::get_subsystem<runtime::asset_manager>();
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 
 	{
 		auto object = ecs.create();
-		object.set_name("main camera");
-		auto transf_comp = object.assign<transform_component>().lock();
-		transf_comp->set_local_position({0.0f, 2.0f, -5.0f});
-		object.assign<camera_component>();
+		ecs.get<Name>(object).name = ("main camera");
+		auto& transf_comp = ecs.assign<transform_component>(object);
+		transf_comp.set_local_position({0.0f, 2.0f, -5.0f});
+		ecs.assign<camera_component>(object);
 	}
 	{
 		auto object = ecs.create();
-		object.set_name("light");
-		auto transf_comp = object.assign<transform_component>().lock();
-		transf_comp->set_local_position({1.0f, 6.0f, -3.0f});
-		transf_comp->rotate_local(50.0f, -30.0f, 0.0f);
+		ecs.get<Name>(object).name = ("light");
+		auto& transf_comp = ecs.assign<transform_component>(object);
+		transf_comp.set_local_position({1.0f, 6.0f, -3.0f});
+		transf_comp.rotate_local(50.0f, -30.0f, 0.0f);
 
 		light light_data;
 		light_data.color = math::color(255, 244, 214, 255);
-		auto light_comp = object.assign<light_component>().lock();
-		light_comp->set_light(light_data);
+		auto& light_comp = ecs.assign<light_component>(object);
+		light_comp.set_light(light_data);
 	}
 	{
 		auto object = ecs.create();
-		object.set_name("global probe");
-		auto transf_comp = object.assign<transform_component>().lock();
-		transf_comp->set_local_position({0.0f, 0.1f, 0.0f});
+		ecs.get<Name>(object).name = ("global probe");
+		auto& transf_comp = ecs.assign<transform_component>(object);
+		transf_comp.set_local_position({0.0f, 0.1f, 0.0f});
 
 		reflection_probe probe;
 		probe.method = reflect_method::environment;
@@ -109,9 +113,9 @@ void default_scene()
 	}
 	{
 		auto object = ecs.create();
-		object.set_name("local probe");
-		auto transf_comp = object.assign<transform_component>().lock();
-		transf_comp->set_local_position({0.0f, 0.1f, 0.0f});
+		ecs.get<Name>(object).name = ("local probe");
+		auto& transf_comp = ecs.assign<transform_component>(object);
+		transf_comp.set_local_position({0.0f, 0.1f, 0.0f});
 
 		reflection_probe probe;
 		probe.method = reflect_method::static_only;
@@ -121,41 +125,41 @@ void default_scene()
 	}
 	{
 		auto object = ecs.create();
-		object.set_name("platform");
-		object.assign<transform_component>();
+		ecs.get<Name>(object).name = ("platform");
+		ecs.assign<transform_component>(object);
 
 		auto asset_future = am.load<mesh>("embedded:/plane");
 		model model;
 		model.set_lod(asset_future.get(), 0);
 
 		// Add component and configure it.
-		auto model_comp = object.assign<model_component>().lock();
-		model_comp->set_casts_shadow(true);
-		model_comp->set_casts_reflection(true);
-		model_comp->set_model(model);
+		auto& model_comp = ecs.assign<model_component>(object);
+		model_comp.set_casts_shadow(true);
+		model_comp.set_casts_reflection(true);
+		model_comp.set_model(model);
 	}
 	{
 		auto object = ecs.create();
-		object.set_name("object");
-		auto transf_comp = object.assign<transform_component>().lock();
-		transf_comp->set_local_position({-2.0f, 0.5f, 0.0f});
+		ecs.get<Name>(object).name = ("object");
+		auto& transf_comp = ecs.assign<transform_component>(object);
+		transf_comp.set_local_position({-2.0f, 0.5f, 0.0f});
 
 		auto asset_future = am.load<mesh>("embedded:/sphere");
 		model model;
 		model.set_lod(asset_future.get(), 0);
 
 		// Add component and configure it.
-		auto model_comp = object.assign<model_component>().lock();
-		model_comp->set_casts_shadow(true);
-		model_comp->set_casts_reflection(false);
-		model_comp->set_model(model);
+		auto& model_comp = ecs.assign<model_component>(object);
+		model_comp.set_casts_shadow(true);
+		model_comp.set_casts_reflection(false);
+		model_comp.set_model(model);
 	}
 
 	{
 		auto object = ecs.create();
-		object.set_name("object_with_lods");
-		auto transf_comp = object.assign<transform_component>().lock();
-		transf_comp->set_local_position({2.0f, 1.0f, 0.0f});
+		ecs.get<Name>(object).name = ("object_with_lods");
+		auto& transf_comp = ecs.assign<transform_component>(object);
+		transf_comp.set_local_position({2.0f, 1.0f, 0.0f});
 
 		model model;
 		{
@@ -171,19 +175,19 @@ void default_scene()
 			model.set_lod(asset_future.get(), 2);
 		}
 		// Add component and configure it.
-		auto model_comp = object.assign<model_component>().lock();
-		model_comp->set_casts_shadow(true);
-		model_comp->set_casts_reflection(false);
-		model_comp->set_model(model);
+		auto& model_comp = ecs.assign<model_component>(object);
+		model_comp.set_casts_shadow(true);
+		model_comp.set_casts_reflection(false);
+		model_comp.set_model(model);
 	}
 }
 
 auto create_new_scene()
 {
 	auto& es = core::get_subsystem<editor::editing_system>();
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	es.save_editor_camera();
-	ecs.dispose();
+	ecs.reset();
 	es.load_editor_camera();
 	default_scene();
 	es.scene.clear();
@@ -299,7 +303,7 @@ void app::draw_menubar(render_window& window)
 			{
 				save_scene();
 			}
-			auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+			auto& ecs = core::get_subsystem<SpatialSystem>();
 
 			if(gui::MenuItem("SAVE AS..", "CTRL+SHIFT+S", false, ecs.size() > 0 && current_project != ""))
 			{

@@ -178,14 +178,15 @@ void picking_system::frame_render(delta_t dt)
 			{
 				if(pair.second == max_amount)
 				{
-					id_key = pair.first;
+					EntityType id_key = pair.first;
 					// if(ecs.valid_index(id_key))
-					if (true)
+					if (ecs.valid(id_key))
 					{
-						auto eid = ecs.create_id(id_key);
-						auto picked_entity = ecs.get(eid);
-						if(picked_entity)
-							es.select(picked_entity);
+						// auto eid = ecs.create_id(id_key);
+						// auto picked_entity = ecs.get(eid);
+						// if(picked_entity) {
+							// es.select(id_key);
+						// }
 					}
 					break;
 				}

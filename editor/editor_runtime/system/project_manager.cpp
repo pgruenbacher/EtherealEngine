@@ -157,11 +157,11 @@ void add_to_syncer<gfx::shader>(std::vector<uint64_t>& watchers, fs::syncer& syn
 
 void project_manager::close_project()
 {
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
 	auto& es = core::get_subsystem<editing_system>();
 	es.close_project();
-	ecs.dispose();
+	ecs.reset();
 	am.clear("app:/data");
 	unwatch(app_watchers_);
 	app_meta_syncer_.unsync();

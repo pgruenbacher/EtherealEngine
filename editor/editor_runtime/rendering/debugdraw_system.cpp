@@ -22,15 +22,16 @@ namespace editor
 void debugdraw_system::frame_render(delta_t)
 {
 	auto& es = core::get_subsystem<editing_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& editor_camera = es.camera;
 	auto& selected = es.selection_data.object;
-	if(!editor_camera || !editor_camera.has_component<camera_component>())
+	if (editor_camera != entt::null || !ecs.has<camera_component>(editor_camera))
 		return;
 
-	const auto camera_comp = editor_camera.get_component<camera_component>();
-	const auto camera_comp_ptr = camera_comp.lock().get();
-	auto& render_view = camera_comp_ptr->get_render_view();
-	auto& camera = camera_comp_ptr->get_camera();
+	auto& camera_comp = ecs.get<camera_component>(editor_camera);
+	// const auto camera_comp_ptr = camera_comp.lock().get();
+	auto& render_view = camera_comp.get_render_view();
+	auto& camera = camera_comp.get_camera();
 	const auto& view = camera.get_view();
 	const auto& proj = camera.get_projection();
 	const auto& viewport_size = camera.get_viewport_size();
@@ -97,18 +98,18 @@ void debugdraw_system::frame_render(delta_t)
 
 	auto selected_entity = selected.get_value<EntityType>();
 
-	if(!selected_entity || !selected_entity.has_component<transform_component>())
+	if(selected_entity != entt::null || !ecs.has<transform_component>(selected_entity))
 		return;
 
-	const auto transform_comp = selected_entity.get_component<transform_component>().lock();
-	const auto transform_comp_ptr = transform_comp.get();
-	const auto& world_transform = transform_comp_ptr->get_transform();
+	const auto& transform_comp = ecs.get<transform_component>(selected_entity);
+	// const auto transform_comp_ptr = transform_comp.get();
+	const auto& world_transform = transform_comp.get_transform();
 
-	if(selected_entity.has_component<camera_component>() && selected_entity != editor_camera)
+	if(ecs.has<camera_component>(selected_entity) && selected_entity != editor_camera)
 	{
-		const auto selected_camera_comp = selected_entity.get_component<camera_component>();
-		const auto selected_camera_comp_ptr = selected_camera_comp.lock().get();
-		auto& selected_camera = selected_camera_comp_ptr->get_camera();
+		auto& selected_camera_comp = ecs.get<camera_component>(selected_entity);
+		// const auto selected_camera_comp_ptr = selected_camera_comp.lock().get();
+		auto& selected_camera = selected_camera_comp.get_camera();
 		const auto view_proj = selected_camera.get_view_projection();
 		const auto bounds = selected_camera.get_local_bounding_box();
 		dd.encoder.push();
@@ -135,11 +136,11 @@ void debugdraw_system::frame_render(delta_t)
 		dd.encoder.pop();
 	}
 
-	if(selected_entity.has_component<light_component>())
+	if(ecs.has<light_component>(selected_entity))
 	{
-		const auto light_comp = selected_entity.get_component<light_component>();
-		const auto light_comp_ptr = light_comp.lock().get();
-		const auto& light = light_comp_ptr->get_light();
+		const auto& light_comp = ecs.get<light_component>(selected_entity);
+		// const auto light_comp_ptr = light_comp.lock().get();
+		const auto& light = light_comp.get_light();
 		if(light.type == light_type::spot)
 		{
 			auto adjacent = light.spot_data.get_range();
@@ -151,8 +152,8 @@ void debugdraw_system::frame_render(delta_t)
 				dd.encoder.setColor(0xff00ff00);
 				dd.encoder.setWireframe(true);
 				dd.encoder.setLod(3);
-				math::vec3 from = transform_comp_ptr->get_position();
-				math::vec3 to = from + transform_comp_ptr->get_z_axis() * adjacent;
+				math::vec3 from = transform_comp.get_position();
+				math::vec3 to = from + transform_comp.get_z_axis() * adjacent;
 				dd.encoder.drawCone({to.x, to.y, to.z}, {from.x, from.y, from.z}, oposite);
 				dd.encoder.pop();
 			}
@@ -164,8 +165,8 @@ void debugdraw_system::frame_render(delta_t)
 				dd.encoder.setColor(0xff00ffff);
 				dd.encoder.setWireframe(true);
 				dd.encoder.setLod(3);
-				math::vec3 from = transform_comp_ptr->get_position();
-				math::vec3 to = from + transform_comp_ptr->get_z_axis() * adjacent;
+				math::vec3 from = transform_comp.get_position();
+				math::vec3 to = from + transform_comp.get_z_axis() * adjacent;
 				dd.encoder.drawCone({to.x, to.y, to.z}, {from.x, from.y, from.z}, oposite);
 				dd.encoder.pop();
 			}
@@ -176,7 +177,7 @@ void debugdraw_system::frame_render(delta_t)
 			dd.encoder.push();
 			dd.encoder.setColor(0xff00ff00);
 			dd.encoder.setWireframe(true);
-			math::vec3 center = transform_comp_ptr->get_position();
+			math::vec3 center = transform_comp.get_position();
 			dd.encoder.drawCircle(Axis::X, center.x, center.y, center.z, radius);
 			dd.encoder.drawCircle(Axis::Y, center.x, center.y, center.z, radius);
 			dd.encoder.drawCircle(Axis::Z, center.x, center.y, center.z, radius);
@@ -188,11 +189,11 @@ void debugdraw_system::frame_render(delta_t)
 			dd.encoder.setLod(255);
 			dd.encoder.setColor(0xff00ff00);
 			dd.encoder.setWireframe(true);
-			math::vec3 from1 = transform_comp_ptr->get_position();
-			math::vec3 to1 = from1 + transform_comp_ptr->get_z_axis() * 2.0f;
+			math::vec3 from1 = transform_comp.get_position();
+			math::vec3 to1 = from1 + transform_comp.get_z_axis() * 2.0f;
 			dd.encoder.drawCylinder({from1.x, from1.y, from1.z}, {to1.x, to1.y, to1.z}, 0.1f);
 			math::vec3 from2 = to1;
-			math::vec3 to2 = from2 + transform_comp_ptr->get_z_axis() * 1.5f;
+			math::vec3 to2 = from2 + transform_comp.get_z_axis() * 1.5f;
 			dd.encoder.drawCone({from2.x, from2.y, from2.z}, {to2.x, to2.y, to2.z}, 0.5f);
 			dd.encoder.pop();
 		}
@@ -226,7 +227,7 @@ void debugdraw_system::frame_render(delta_t)
 	// 		dd.encoder.push();
 	// 		dd.encoder.setColor(0xff00ff00);
 	// 		dd.encoder.setWireframe(true);
-	// 		math::vec3 center = transform_comp_ptr->get_position();
+	// 		math::vec3 center = transform_comp.get_position();
 	// 		dd.encoder.drawCircle(Axis::X, center.x, center.y, center.z, radius);
 	// 		dd.encoder.drawCircle(Axis::Y, center.x, center.y, center.z, radius);
 	// 		dd.encoder.drawCircle(Axis::Z, center.x, center.y, center.z, radius);
@@ -234,11 +235,11 @@ void debugdraw_system::frame_render(delta_t)
 	// 	}
 	// }
 
-	if(selected_entity.has_component<model_component>())
+	if(ecs.has<model_component>(selected_entity))
 	{
-		const auto model_comp = selected_entity.get_component<model_component>();
-		const auto model_comp_ptr = model_comp.lock().get();
-		const auto& model = model_comp_ptr->get_model();
+		const auto& model_comp = ecs.get<model_component>(selected_entity);
+		// const auto model_comp_ptr = model_comp.lock().get();
+		const auto& model = model_comp.get_model();
 		if(!model.is_valid())
 			return;
 

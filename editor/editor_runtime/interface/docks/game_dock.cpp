@@ -12,8 +12,8 @@ void game_dock::render(const ImVec2&)
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& editor_camera = es.camera;
 
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
-	ecs.for_each<camera_component>([&editor_camera](EntityType e, camera_component& camera_comp) {
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+	ecs.view<camera_component>().each([&editor_camera](EntityType e, auto& camera_comp) {
 		if(e == editor_camera)
 			return;
 

@@ -12,6 +12,7 @@
 #include <runtime/animation/animation.h>
 #include <runtime/assets/asset_manager.h>
 #include <runtime/assets/impl/asset_writer.h>
+#include <runtime/ecs/components/relation.h>
 #include <runtime/ecs/constructs/prefab.h>
 #include <runtime/ecs/constructs/scene.h>
 #include <runtime/ecs/constructs/utils.h>
@@ -142,19 +143,21 @@ static void process_drag_drop_target(const fs::path& absolute_path)
 				auto payload = gui::AcceptDragDropPayload("entity");
 				if(payload != nullptr)
 				{
-					std::uint32_t entity_index = 0;
-					std::memcpy(&entity_index, payload->Data, std::size_t(payload->DataSize));
-					auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
-					if(ecs.valid_index(entity_index))
+					// std::uint32_t entity_index = 0;
+					// std::memcpy(Entity, payload->Data, std::size_t(payload->DataSize));
+					EntityType dropped_entity = entt::null;
+					std::memcpy(&dropped_entity, payload->Data, std::size_t(payload->DataSize));
+					auto& ecs = core::get_subsystem<SpatialSystem>();
+					if(ecs.valid(dropped_entity))
 					{
-						auto eid = ecs.create_id(entity_index);
-						auto dropped_entity = ecs.get(eid);
-						if(dropped_entity)
-						{
-							auto prefab_path = absolute_path /
-											   fs::path(dropped_entity.to_string() + ".pfb").make_preferred();
-							ecs::utils::save_entity_to_file(prefab_path, dropped_entity);
-						}
+						// auto eid = ecs.create_id(entity_index);
+						// auto dropped_entity = ecs.get(eid);
+						// if(dropped_entity)
+						// {
+						auto prefab_path = absolute_path /
+										   fs::path(ecs.get<Name>(dropped_entity).name + ".pfb").make_preferred();
+						ecs::utils::save_entity_to_file(prefab_path, dropped_entity);
+						// }
 					}
 				}
 			}

@@ -13,6 +13,7 @@
 #include <runtime/ecs/components/camera_component.h>
 #include <runtime/ecs/components/model_component.h>
 #include <runtime/ecs/components/transform_component.h>
+#include <runtime/ecs/components/relation.h>
 #include <runtime/ecs/constructs/prefab.h>
 #include <runtime/ecs/constructs/utils.h>
 #include <runtime/input/input.h>
@@ -273,6 +274,7 @@ void draw_selected_camera(const ImVec2& size)
 {
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& es = core::get_subsystem<editor::editing_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& selected = es.selection_data.object;
 	auto& editor_camera = es.camera;
 
@@ -280,13 +282,13 @@ void draw_selected_camera(const ImVec2& size)
 	{
 		auto sel = selected.get_value<EntityType>();
 
-		if(sel && (editor_camera != sel) && sel.has_component<camera_component>())
+		if(sel && (editor_camera != sel) && ecs.has<camera_component>(sel))
 		{
-			const auto selected_camera = sel.get_component<camera_component>().lock();
-			const auto& camera = selected_camera->get_camera();
-			auto& render_view = selected_camera->get_render_view();
-			const auto& viewport_size = camera.get_viewport_size();
-			const auto surface = render_view.get_output_fbo(viewport_size);
+			auto& selected_camera = ecs.get<camera_component>(sel);
+			const auto& camera = selected_camera.get_camera();
+			auto& render_view = selected_camera.get_render_view();
+			auto& viewport_size = camera.get_viewport_size();
+			auto surface = render_view.get_output_fbo(viewport_size);
 
 			float factor =
 				std::min(size.x / float(viewport_size.width), size.y / float(viewport_size.height)) / 4.0f;
@@ -305,11 +307,11 @@ void draw_selected_camera(const ImVec2& size)
 			}
 			gui::End();
 
-			if(input.is_key_pressed(mml::keyboard::F) && sel.has_component<transform_component>())
+			if(input.is_key_pressed(mml::keyboard::F) && ecs.has<transform_component>(sel))
 			{
-				auto transform = editor_camera.get_component<transform_component>().lock();
-				auto transform_selected = sel.get_component<transform_component>().lock();
-				transform_selected->set_transform(transform->get_transform());
+				auto& transform = ecs.get<transform_component>(editor_camera);
+				auto& transform_selected = ecs.get<transform_component>(sel);
+				transform_selected.set_transform(transform.get_transform());
 			}
 		}
 	}
@@ -319,6 +321,7 @@ void manipulation_gizmos()
 {
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& es = core::get_subsystem<editor::editing_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& selected = es.selection_data.object;
 	auto& editor_camera = es.camera;
 	auto& operation = es.operation;
@@ -352,14 +355,14 @@ void manipulation_gizmos()
 	if(selected && selected.is_type<EntityType>())
 	{
 		auto sel = selected.get_value<EntityType>();
-		if(sel && sel != editor_camera && sel.has_component<transform_component>())
+		if(sel && sel != editor_camera && ecs.has<transform_component>(sel))
 		{
 			auto p = gui::GetItemRectMin();
 			auto s = gui::GetItemRectSize();
 			imguizmo::set_view_rect(p.x, p.y, s.x, s.y);
-			auto camera_comp = editor_camera.get_component<camera_component>().lock();
-			auto transform_comp = sel.get_component<transform_component>().lock();
-			auto transform = transform_comp->get_transform();
+			const auto& camera_comp = ecs.get<camera_component>(editor_camera);
+			auto& transform_comp = ecs.get<transform_component>(sel);
+			auto transform = transform_comp.get_transform();
 			math::transform delta;
 			float* snap = nullptr;
 			if(input.is_key_down(mml::keyboard::LControl))
@@ -377,12 +380,12 @@ void manipulation_gizmos()
 					snap = &es.snap_data.scale_snap;
 				}
 			}
-			const auto& camera = camera_comp->get_camera();
+			const auto& camera = camera_comp.get_camera();
 			math::mat4 output = transform;
 			imguizmo::manipulate(camera.get_view(), camera.get_projection(), operation, mode,
 								 math::value_ptr(output), nullptr, snap);
 
-			transform_comp->set_transform(output);
+			transform_comp.set_transform(output);
 
 //						if(sel.has_component<model_component>())
 //						{
@@ -416,11 +419,12 @@ void handle_camera_movement()
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& sim = core::get_subsystem<core::simulation>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 
 	auto& editor_camera = es.camera;
 	auto dt = sim.get_delta_time().count();
 
-	auto transform = editor_camera.get_component<transform_component>().lock();
+	auto& transform = ecs.get<transform_component>(editor_camera);
 	float movement_speed = 5.0f;
 	float rotation_speed = 0.2f;
 	float multiplier = 5.0f;
@@ -435,11 +439,11 @@ void handle_camera_movement()
 
 		if(delta_move.x != 0)
 		{
-			transform->move_local({-1 * delta_move.x * movement_speed * dt, 0.0f, 0.0f});
+			transform.move_local({-1 * delta_move.x * movement_speed * dt, 0.0f, 0.0f});
 		}
 		if(delta_move.y != 0)
 		{
-			transform->move_local({0.0f, delta_move.y * movement_speed * dt, 0.0f});
+			transform.move_local({0.0f, delta_move.y * movement_speed * dt, 0.0f});
 		}
 
 	}
@@ -453,51 +457,51 @@ void handle_camera_movement()
 
 		if(input.is_key_down(mml::keyboard::W))
 		{
-			transform->move_local({0.0f, 0.0f, movement_speed * dt});
+			transform.move_local({0.0f, 0.0f, movement_speed * dt});
 		}
 
 		if(input.is_key_down(mml::keyboard::S))
 		{
-			transform->move_local({0.0f, 0.0f, -movement_speed * dt});
+			transform.move_local({0.0f, 0.0f, -movement_speed * dt});
 		}
 
 		if(input.is_key_down(mml::keyboard::A))
 		{
-			transform->move_local({-movement_speed * dt, 0.0f, 0.0f});
+			transform.move_local({-movement_speed * dt, 0.0f, 0.0f});
 		}
 
 		if(input.is_key_down(mml::keyboard::D))
 		{
-			transform->move_local({movement_speed * dt, 0.0f, 0.0f});
+			transform.move_local({movement_speed * dt, 0.0f, 0.0f});
 		}
 		if(input.is_key_down(mml::keyboard::Up))
 		{
-			transform->move_local({0.0f, 0.0f, movement_speed * dt});
+			transform.move_local({0.0f, 0.0f, movement_speed * dt});
 		}
 
 		if(input.is_key_down(mml::keyboard::Down))
 		{
-			transform->move_local({0.0f, 0.0f, -movement_speed * dt});
+			transform.move_local({0.0f, 0.0f, -movement_speed * dt});
 		}
 
 		if(input.is_key_down(mml::keyboard::Left))
 		{
-			transform->move_local({-movement_speed * dt, 0.0f, 0.0f});
+			transform.move_local({-movement_speed * dt, 0.0f, 0.0f});
 		}
 
 		if(input.is_key_down(mml::keyboard::Right))
 		{
-			transform->move_local({movement_speed * dt, 0.0f, 0.0f});
+			transform.move_local({movement_speed * dt, 0.0f, 0.0f});
 		}
 
 		if(input.is_key_down(mml::keyboard::Space))
 		{
-			transform->move_local({0.0f, movement_speed * dt, 0.0f});
+			transform.move_local({0.0f, movement_speed * dt, 0.0f});
 		}
 
 		if(input.is_key_down(mml::keyboard::LControl))
 		{
-			transform->move_local({0.0f, -movement_speed * dt, 0.0f});
+			transform.move_local({0.0f, -movement_speed * dt, 0.0f});
 		}
 
 		float x = static_cast<float>(delta_move.x);
@@ -509,18 +513,17 @@ void handle_camera_movement()
 			float dx = x * rotation_speed;
 			float dy = y * rotation_speed;
 
-			transform->rotate(0.0f, dx, 0.0f);
-			transform->rotate_local(dy, 0.0f, 0.0f);
+			transform.rotate(0.0f, dx, 0.0f);
+			transform.rotate_local(dy, 0.0f, 0.0f);
 		}
 
 		float delta_wheel = input.get_mouse_wheel_scroll_delta_move();
-		transform->move_local({0.0f, 0.0f, 14.0f * movement_speed * delta_wheel * dt});
+		transform.move_local({0.0f, 0.0f, 14.0f * movement_speed * delta_wheel * dt});
 	}
 }
 
-static void process_drag_drop_target(std::shared_ptr<camera_component> camera_comp)
-{
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+static void process_drag_drop_target(camera_component& camera_comp){
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 
@@ -555,19 +558,19 @@ static void process_drag_drop_target(std::shared_ptr<camera_component> camera_co
 				if(entry)
 				{
 					auto object = entry->instantiate();
-					auto trans_comp = object.get_component<transform_component>().lock();
-					if(trans_comp)
+					if(ecs.has<transform_component>(object))
 					{
+						auto& trans_comp = ecs.get<transform_component>(object);
 						math::vec3 projected_pos;
 						auto cursor_pos = gui::GetMousePos();
-						if(camera_comp->get_camera().viewport_to_world(
+						if(camera_comp.get_camera().viewport_to_world(
 							   math::vec2{cursor_pos.x, cursor_pos.y},
 							   math::plane::from_point_normal(math::vec3{0.0f, 0.0f, 0.0f},
 															  math::vec3{0.0f, 1.0f, 0.0f}),
 							   projected_pos, false))
 						{
 
-							trans_comp->set_position(projected_pos);
+							trans_comp.set_position(projected_pos);
 						}
 					}
 					es.select(object);
@@ -598,26 +601,26 @@ static void process_drag_drop_target(std::shared_ptr<camera_component> camera_co
 
 					auto object = ecs.create();
 					// Add component and configure it.
-					auto trans_comp = object.assign<transform_component>().lock();
-					if(trans_comp)
+					auto& trans_comp = ecs.assign<transform_component>(object);
+					// if(trans_comp)
 					{
 						math::vec3 projected_pos;
 						auto cursor_pos = gui::GetMousePos();
-						if(camera_comp->get_camera().viewport_to_world(
+						if(camera_comp.get_camera().viewport_to_world(
 							   math::vec2{cursor_pos.x, cursor_pos.y},
 							   math::plane::from_point_normal(math::vec3{0.0f, 0.0f, 0.0f},
 															  math::vec3{0.0f, 1.0f, 0.0f}),
 							   projected_pos, false))
 						{
 
-							trans_comp->set_position(projected_pos);
+							trans_comp.set_position(projected_pos);
 						}
 					}
 					// Add component and configure it.
-					auto model_comp = object.assign<model_component>().lock();
-					model_comp->set_casts_shadow(true);
-					model_comp->set_casts_reflection(false);
-					model_comp->set_model(mdl);
+					auto& model_comp = ecs.assign<model_component>(object);
+					model_comp.set_casts_shadow(true);
+					model_comp.set_casts_reflection(false);
+					model_comp.set_model(mdl);
 
 					es.select(object);
 				}
@@ -631,6 +634,7 @@ static void process_drag_drop_target(std::shared_ptr<camera_component> camera_co
 void scene_dock::render(const ImVec2& area)
 {
 	auto& es = core::get_subsystem<editor::editing_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& renderer = core::get_subsystem<runtime::renderer>();
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& sim = core::get_subsystem<core::simulation>();
@@ -639,8 +643,8 @@ void scene_dock::render(const ImVec2& area)
 	auto& editor_camera = es.camera;
 	auto& selected = es.selection_data.object;
 
-	bool has_edit_camera = editor_camera && editor_camera.has_component<camera_component>() &&
-						   editor_camera.has_component<transform_component>();
+	bool has_edit_camera = editor_camera && ecs.has<camera_component>(editor_camera) &&
+						   ecs.has<transform_component>(editor_camera);
 
 	show_statistics(area, sim.get_fps(), show_gbuffer);
 
@@ -653,16 +657,16 @@ void scene_dock::render(const ImVec2& area)
 	auto pos = gui::GetCursorScreenPos();
 	draw_selected_camera(size);
 
-	auto camera_comp = editor_camera.get_component<camera_component>().lock();
+	auto& camera_comp = ecs.get<camera_component>(editor_camera);
 	if(size.x > 0 && size.y > 0)
 	{
-		camera_comp->get_camera().set_viewport_pos(
+		camera_comp.get_camera().set_viewport_pos(
 			{static_cast<std::uint32_t>(pos.x), static_cast<std::uint32_t>(pos.y)});
-		camera_comp->set_viewport_size(
+		camera_comp.set_viewport_size(
 			{static_cast<std::uint32_t>(size.x), static_cast<std::uint32_t>(size.y)});
 
-		const auto& camera = camera_comp->get_camera();
-		auto& render_view = camera_comp->get_render_view();
+		const auto& camera = camera_comp.get_camera();
+		auto& render_view = camera_comp.get_render_view();
 		const auto& viewport_size = camera.get_viewport_size();
 		const auto surface = render_view.get_output_fbo(viewport_size);
 		auto tex = surface->get_attachment(0).texture;
@@ -693,7 +697,8 @@ void scene_dock::render(const ImVec2& area)
 					auto sel = selected.get_value<EntityType>();
 					if(sel && sel != editor_camera)
 					{
-						sel.destroy();
+						// sel.destroy();
+						ecs.get<MarkDelete>(sel).markDelete();
 						es.unselect();
 					}
 				}
@@ -709,9 +714,9 @@ void scene_dock::render(const ImVec2& area)
 						if(sel && sel != editor_camera)
 						{
 							auto clone = ecs::utils::clone_entity(sel);
-							clone.get_component<transform_component>().lock()->set_parent(
-								sel.get_component<transform_component>().lock()->get_parent(), false, true);
-							es.select(clone);
+							// ecs.get<transform_component>(clone).set_parent(
+							// ecs.get<transform_component>(sel).get_parent(), false, true);
+							// es.select(clone);
 						}
 					}
 				}

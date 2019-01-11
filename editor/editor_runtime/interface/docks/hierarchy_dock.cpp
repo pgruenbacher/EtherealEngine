@@ -9,6 +9,7 @@
 
 #include <runtime/assets/asset_handle.h>
 #include <runtime/assets/asset_manager.h>
+#include <runtime/ecs/components/relation.h>
 #include <runtime/ecs/components/audio_source_component.h>
 #include <runtime/ecs/components/camera_component.h>
 #include <runtime/ecs/components/light_component.h>
@@ -20,22 +21,23 @@
 #include <runtime/ecs/systems/scene_graph.h>
 #include <runtime/input/input.h>
 #include <runtime/rendering/mesh.h>
+
 namespace
 {
-math::bbox calc_bounds(EntityType entity)
+math::bbox calc_bounds(Registry& ecs, EntityType ent)
 {
 	const math::vec3 one = {1.0f, 1.0f, 1.0f};
 	math::bbox bounds = math::bbox(-one, one);
-	auto ent_trans_comp = entity.get_component<transform_component>().lock();
-	if(ent_trans_comp)
+	if(ecs.has<transform_component>(ent))
 	{
-		auto target_pos = ent_trans_comp->get_position();
+		auto& ent_trans_comp = ecs.get<transform_component>(ent);
+		auto target_pos = ent_trans_comp.get_position();
 		bounds = math::bbox(target_pos - one, target_pos + one);
 
-		auto ent_model_comp = entity.get_component<model_component>().lock();
-		if(ent_model_comp)
+		if(ecs.has<model_component>(ent))
 		{
-			const auto& model = ent_model_comp->get_model();
+			auto& ent_model_comp = ecs.get<model_component>(ent);
+			const auto& model = ent_model_comp.get_model();
 			if(model.is_valid())
 			{
 				const auto current_mesh = model.get_lod(0);
@@ -45,17 +47,17 @@ math::bbox calc_bounds(EntityType entity)
 				}
 			}
 		}
-		const auto& world = ent_trans_comp->get_transform();
+		const auto& world = ent_trans_comp.get_transform();
 		bounds = math::bbox::mul(bounds, world);
 	}
 	return bounds;
 };
 
-void focus_entity_on_bounds(EntityType entity, const math::bbox& bounds)
+void focus_entity_on_bounds(Registry& ecs, EntityType ent, const math::bbox& bounds)
 {
-	auto trans_comp = entity.get_component<transform_component>().lock();
-	auto camera_comp = entity.get_component<camera_component>().lock();
-	const auto& cam = camera_comp->get_camera();
+	auto& trans_comp = ecs.get<transform_component>(ent);
+	auto& camera_comp = ecs.get<camera_component>(ent);
+	const auto& cam = camera_comp.get_camera();
 
 	math::vec3 cen = bounds.get_center();
 	math::vec3 size = bounds.get_dimensions();
@@ -71,9 +73,9 @@ void focus_entity_on_bounds(EntityType entity, const math::bbox& bounds)
 	float mfov = math::min(fov, horizontalFOV);
 	float dist = radius / (math::sin(math::radians(mfov) / 2.0f));
 
-	camera_comp->set_ortho_size(radius);
-	trans_comp->set_position(cen - dist * trans_comp->get_z_axis());
-	trans_comp->look_at(cen);
+	camera_comp.set_ortho_size(radius);
+	trans_comp.set_position(cen - dist * trans_comp.get_z_axis());
+	trans_comp.look_at(cen);
 }
 
 enum class context_action
@@ -85,7 +87,7 @@ enum class context_action
 static context_action check_context_menu(EntityType entity)
 {
 	auto& es = core::get_subsystem<editor::editing_system>();
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& editor_camera = es.camera;
 	context_action action = context_action::none;
 	if(entity && entity != editor_camera)
@@ -95,7 +97,7 @@ static context_action check_context_menu(EntityType entity)
 			if(gui::MenuItem("CREATE CHILD"))
 			{
 				auto object = ecs.create();
-				object.assign<transform_component>().lock()->set_parent(entity);
+				// object.assign<transform_component>().lock()->set_parent(entity);
 			}
 
 			if(gui::MenuItem("RENAME", "F2"))
@@ -105,30 +107,31 @@ static context_action check_context_menu(EntityType entity)
 
 			if(gui::MenuItem("DUPLICATE", "CTRL + D"))
 			{
-				auto object = ecs::utils::clone_entity(entity);
+				// auto object = ecs::utils::clone_entity(entity);
 
-				auto obj_trans_comp = object.get_component<transform_component>().lock();
-				auto ent_trans_comp = entity.get_component<transform_component>().lock();
-				if(obj_trans_comp && ent_trans_comp)
-				{
-					obj_trans_comp->set_parent(ent_trans_comp->get_parent(), false, true);
-				}
+				// auto obj_trans_comp = object.get_component<transform_component>().lock();
+				// auto ent_trans_comp = entity.get_component<transform_component>().lock();
+				// if(obj_trans_comp && ent_trans_comp)
+				// {
+				// 	obj_trans_comp->set_parent(ent_trans_comp->get_parent(), false, true);
+				// }
 
-				es.select(object);
+				// es.select(object);
 			}
 
 			if(gui::MenuItem("DELETE", "DEL"))
 			{
-				entity.destroy();
+				// entity.destroy();
+				ecs.get<MarkDelete>(entity).markDelete();
 			}
 
 			if(gui::MenuItem("FOCUS", "SHIFT + F"))
 			{
-				if(editor_camera.has_component<transform_component>() &&
-				   editor_camera.has_component<camera_component>())
+				if(ecs.has<transform_component>(editor_camera) &&
+				   ecs.has<camera_component>(editor_camera))
 				{
-					auto bounds = calc_bounds(entity);
-					focus_entity_on_bounds(editor_camera, bounds);
+					auto bounds = calc_bounds(ecs, entity);
+					focus_entity_on_bounds(ecs, editor_camera, bounds);
 				}
 			}
 
@@ -142,7 +145,7 @@ static context_action check_context_menu(EntityType entity)
 			if(gui::MenuItem("CREATE EMPTY"))
 			{
 				auto object = ecs.create();
-				object.assign<transform_component>();
+				ecs.assign<transform_component>(object);
 				es.select(object);
 			}
 
@@ -172,14 +175,15 @@ static context_action check_context_menu(EntityType entity)
 								model.set_lod(asset_future.get(), 0);
 
 								auto object = ecs.create();
-								object.set_name(name);
-								auto transf_comp = object.assign<transform_component>().lock();
-								transf_comp->set_local_position({0.0f, 0.5f, 0.0f});
+								// object.set_name(name);
+								ecs.get<Name>(object).name = name;
+								auto& transf_comp = ecs.assign<transform_component>(object);
+								transf_comp.set_local_position({0.0f, 0.5f, 0.0f});
 
-								auto model_comp = object.assign<model_component>().lock();
-								model_comp->set_casts_shadow(true);
-								model_comp->set_casts_reflection(false);
-								model_comp->set_model(model);
+								auto& model_comp = ecs.assign<model_component>(object);
+								model_comp.set_casts_shadow(true);
+								model_comp.set_casts_reflection(false);
+								model_comp.set_model(model);
 								es.select(object);
 							}
 						}
@@ -205,18 +209,19 @@ static context_action check_context_menu(EntityType entity)
 						if(gui::MenuItem(name.c_str()))
 						{
 							auto object = ecs.create();
-							object.set_name(name + " LIGHT");
+							ecs.get<Name>(object).name = name + " LIGHT";
+							// object.set_name(name + " LIGHT");
 
-							auto transf_comp = object.assign<transform_component>().lock();
-							transf_comp->set_local_position({0.0f, 1.0f, 0.0f});
-							transf_comp->rotate_local(50.0f, -30.0f, 0.0f);
+							auto& transf_comp = ecs.assign<transform_component>(object);
+							transf_comp.set_local_position({0.0f, 1.0f, 0.0f});
+							transf_comp.rotate_local(50.0f, -30.0f, 0.0f);
 
 							light light_data;
 							light_data.color = math::color(255, 244, 214, 255);
 							light_data.type = type;
 
-							auto light_comp = object.assign<light_component>().lock();
-							light_comp->set_light(light_data);
+							auto& light_comp = ecs.assign<light_component>(object);
+							light_comp.set_light(light_data);
 							es.select(object);
 						}
 					}
@@ -235,9 +240,10 @@ static context_action check_context_menu(EntityType entity)
 						if(gui::MenuItem(name.c_str()))
 						{
 							auto object = ecs.create();
-							object.set_name(name);
-							auto transf_comp = object.assign<transform_component>().lock();
-							transf_comp->set_local_position({0.0f, 0.1f, 0.0f});
+							// object.set_name(name);
+							ecs.get<Name>(object).name = name;
+							auto& transf_comp = ecs.assign<transform_component>(object);
+							transf_comp.set_local_position({0.0f, 0.1f, 0.0f});
 
 							reflection_probe probe;
 							probe.method = reflect_method::static_only;
@@ -257,9 +263,10 @@ static context_action check_context_menu(EntityType entity)
 				if(gui::MenuItem("SOURCE"))
 				{
 					auto object = ecs.create();
-					object.set_name("AUDIO SOURCE");
-					object.assign<transform_component>();
-					object.assign<audio_source_component>();
+					// object.set_name("AUDIO SOURCE");
+					ecs.get<Name>(object).name = "AUDIO SOURCE";
+					ecs.assign<transform_component>(object);
+					ecs.assign<audio_source_component>(object);
 					es.select(object);
 				}
 				gui::EndMenu();
@@ -268,11 +275,12 @@ static context_action check_context_menu(EntityType entity)
 			if(gui::MenuItem("CAMERA"))
 			{
 				auto object = ecs.create();
-				object.set_name("CAMERA");
-				auto transf_comp = object.assign<transform_component>().lock();
-				transf_comp->set_local_position({0.0f, 2.0f, -5.0f});
+				// object.set_name("CAMERA");
+				ecs.get<Name>(object).name = "CAMERA";
+				auto& transf_comp = ecs.assign<transform_component>(object);
+				transf_comp.set_local_position({0.0f, 2.0f, -5.0f});
 
-				object.assign<camera_component>();
+				ecs.assign<camera_component>(object);
 				es.select(object);
 			}
 			gui::EndPopup();
@@ -285,9 +293,10 @@ static bool process_drag_drop_source(EntityType entity)
 {
 	if(entity && gui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 	{
-		auto entity_index = entity.id().index();
-		gui::TextUnformatted(entity.to_string().c_str());
-		gui::SetDragDropPayload("entity", &entity_index, sizeof(entity_index));
+		// auto entity_index = entity.id().index();
+		gui::TextUnformatted("entity");
+		// gui::TextUnformatted(entity.to_string().c_str());
+		gui::SetDragDropPayload("entity", &entity, sizeof(entity));
 		gui::EndDragDropSource();
 		return true;
 	}
@@ -297,7 +306,7 @@ static bool process_drag_drop_source(EntityType entity)
 
 static void process_drag_drop_target(EntityType entity)
 {
-	auto& ecs = core::get_subsystem<runtime::SpatialSystem>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 
@@ -316,20 +325,20 @@ static void process_drag_drop_target(EntityType entity)
 			auto payload = gui::AcceptDragDropPayload("entity");
 			if(payload != nullptr)
 			{
-				std::uint32_t entity_index = 0;
-				std::memcpy(&entity_index, payload->Data, std::size_t(payload->DataSize));
-				if(ecs.valid_index(entity_index))
+				EntityType dropped_entity(entt::null);
+				std::memcpy(&dropped_entity, payload->Data, std::size_t(payload->DataSize));
+				if(ecs.valid(dropped_entity))
 				{
-					auto eid = ecs.create_id(entity_index);
-					auto dropped_entity = ecs.get(eid);
-					if(dropped_entity)
+					// auto eid = ecs.create_id(entity_index);
+					// auto dropped_entity = ecs.get(eid);
+					// if(dropped_entity)
+					// {
+					if(ecs.has<transform_component>(dropped_entity))
 					{
-						auto trans_comp = dropped_entity.get_component<transform_component>().lock();
-						if(trans_comp)
-						{
-							trans_comp->set_parent(entity);
-						}
+						auto& trans_comp = ecs.get<transform_component>(dropped_entity);
+						// trans_comp.set_parent(entity);
 					}
+					// }
 				}
 			}
 		}
@@ -354,11 +363,11 @@ static void process_drag_drop_target(EntityType entity)
 				if(entry)
 				{
 					auto object = entry->instantiate();
-					auto trans_comp = object.get_component<transform_component>().lock();
-					if(trans_comp)
-					{
-						trans_comp->set_parent(entity);
-					}
+					auto& trans_comp = ecs.get<transform_component>(object);
+					// if(trans_comp)
+					// {
+					// 	trans_comp->set_parent(entity);
+					// }
 					es.select(object);
 				}
 			}
@@ -387,12 +396,12 @@ static void process_drag_drop_target(EntityType entity)
 
 					auto object = ecs.create();
 					// Add component and configure it.
-					object.assign<transform_component>().lock()->set_parent(entity);
+					// ecs.assign<transform_component>(object).set_parent(entity);
 					// Add component and configure it.
-					auto model_comp = object.assign<model_component>().lock();
-					model_comp->set_casts_shadow(true);
-					model_comp->set_casts_reflection(false);
-					model_comp->set_model(mdl);
+					auto& model_comp = ecs.assign<model_component>(object);
+					model_comp.set_casts_shadow(true);
+					model_comp.set_casts_reflection(false);
+					model_comp.set_model(mdl);
 
 					es.select(object);
 				}
@@ -424,10 +433,13 @@ void hierarchy_dock::draw_entity(EntityType entity)
 		return;
 	}
 
-	gui::PushID(static_cast<int>(entity.id().index()));
-	gui::PushID(static_cast<int>(entity.id().version()));
+	// gui::PushID(static_cast<int>(entity.id().index()));
+	// gui::PushID(static_cast<int>(entity.id().version()));
+	gui::PushID(entity);
+	// gui::PushID(static_cast<int>(entity.id().version()));
 
 	gui::AlignTextToFramePadding();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& selected = es.selection_data.object;
@@ -437,7 +449,8 @@ void hierarchy_dock::draw_entity(EntityType entity)
 		is_selected = selected.get_value<EntityType>() == entity;
 	}
 
-	std::string name = entity.to_string();
+	// std::string name = entity.to_string();
+	std::string name("PAUl");
 	ImGuiTreeNodeFlags flags = 0 | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_OpenOnArrow;
 
 	if(is_selected)
@@ -456,12 +469,12 @@ void hierarchy_dock::draw_entity(EntityType entity)
 			}
 		}
 	}
-	auto trans_comp = entity.get_component<transform_component>().lock();
+	auto& trans_comp = ecs.get<transform_component>(entity);
 	bool no_children = true;
-	if(trans_comp)
-	{
-		no_children = trans_comp->get_children().empty();
-	}
+	// if(trans_comp)
+	// {
+		// no_children = trans_comp->get_children().empty();
+	// }
 
 	if(no_children)
 	{
@@ -486,12 +499,14 @@ void hierarchy_dock::draw_entity(EntityType entity)
 		gui::SetCursorScreenPos(pos);
 		gui::PushItemWidth(gui::GetContentRegionAvailWidth());
 
-		gui::PushID(static_cast<int>(entity.id().index()));
-		gui::PushID(static_cast<int>(entity.id().version()));
+		// gui::PushID(static_cast<int>(entity.id().index()));
+		// gui::PushID(static_cast<int>(entity.id().version()));
+		gui::PushID(entity);
 		if(gui::InputText("", input_buff.data(), input_buff.size(),
 						  ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
 		{
-			entity.set_name(input_buff.data());
+			// entity.set_name(input_buff.data());
+			ecs.get<Name>(entity).name = input_buff.data();
 			edit_label_ = false;
 		}
 
@@ -509,12 +524,17 @@ void hierarchy_dock::draw_entity(EntityType entity)
 
 	if(gui::IsItemHovered() && !gui::IsMouseDragging(0))
 	{
+
+		size_t uid = (entity);
+		static_assert(sizeof((void*)(uid)) == sizeof(uid));
 		if(gui::IsMouseClicked(0))
 		{
-			id_ = window->GetID(trans_comp.get());
+			// id_ = window->GetID(trans_comp.get());
+			id_ = window->GetID((void*)(uid));
 		}
 
-		if(gui::IsMouseReleased(0) && window->GetID(trans_comp.get()) == id_)
+		// if(gui::IsMouseReleased(0) && window->GetID(trans_comp.get()) == id_)
+		if(gui::IsMouseReleased(0) && window->GetID((void*)(uid)) == id_)
 		{
 			if(!is_selected)
 			{
@@ -543,14 +563,14 @@ void hierarchy_dock::draw_entity(EntityType entity)
 	{
 		if(!no_children)
 		{
-			const auto& children = trans_comp->get_children();
-			for(auto& child : children)
-			{
-				if(child.valid())
-				{
-					draw_entity(child);
-				}
-			}
+			// const auto& children = trans_comp->get_children();
+			// for(auto& child : children)
+			// {
+			// 	if(child.valid())
+			// 	{
+			// 		draw_entity(child);
+			// 	}
+			// }
 		}
 
 		gui::TreePop();
@@ -562,6 +582,7 @@ void hierarchy_dock::draw_entity(EntityType entity)
 
 void hierarchy_dock::render(const ImVec2& /*unused*/)
 {
+	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& sg = core::get_subsystem<runtime::scene_graph>();
 	auto& input = core::get_subsystem<runtime::input>();
@@ -576,7 +597,7 @@ void hierarchy_dock::render(const ImVec2& /*unused*/)
 	if(gui::BeginChild("hierarchy_content", gui::GetContentRegionAvail(), false, flags))
 	{
 
-		check_context_menu(runtime::entity());
+		check_context_menu(entt::null);
 
 		if(gui::IsWindowFocused())
 		{
@@ -587,7 +608,8 @@ void hierarchy_dock::render(const ImVec2& /*unused*/)
 					auto sel = selected.get_value<EntityType>();
 					if(sel && sel != editor_camera)
 					{
-						sel.destroy();
+						// sel.destroy();
+						ecs.get<MarkDelete>(sel).markDelete();
 						es.unselect();
 					}
 				}
@@ -601,12 +623,12 @@ void hierarchy_dock::render(const ImVec2& /*unused*/)
 					if(sel && sel != editor_camera)
 					{
 						auto clone = ecs::utils::clone_entity(sel);
-						auto clone_trans_comp = clone.get_component<transform_component>().lock();
-						auto sel_trans_comp = sel.get_component<transform_component>().lock();
-						if(clone_trans_comp && sel_trans_comp)
-						{
-							clone_trans_comp->set_parent(sel_trans_comp->get_parent(), false, true);
-						}
+						auto clone_trans_comp = ecs.get<transform_component>(clone);
+						auto sel_trans_comp = ecs.get<transform_component>(sel);
+						// if(clone_trans_comp && sel_trans_comp)
+						// {
+						// 	clone_trans_comp->set_parent(sel_trans_comp->get_parent(), false, true);
+						// }
 						es.select(clone);
 					}
 				}
@@ -619,17 +641,17 @@ void hierarchy_dock::render(const ImVec2& /*unused*/)
 				auto sel = selected.get_value<EntityType>();
 				if(sel && sel != editor_camera)
 				{
-					if(editor_camera.has_component<transform_component>() &&
-					   editor_camera.has_component<camera_component>())
+					if(ecs.has<transform_component>(editor_camera) &&
+					   ecs.has<camera_component>(editor_camera))
 					{
-						auto bounds = calc_bounds(sel);
-						focus_entity_on_bounds(editor_camera, bounds);
+						auto bounds = calc_bounds(ecs, sel);
+						focus_entity_on_bounds(ecs, editor_camera, bounds);
 					}
 				}
 			}
 		}
 
-		if(editor_camera.valid())
+		if(ecs.valid(editor_camera))
 		{
 			draw_entity(editor_camera);
 			gui::Separator();
@@ -637,7 +659,7 @@ void hierarchy_dock::render(const ImVec2& /*unused*/)
 
 		for(auto& root : roots)
 		{
-			if(root.valid())
+			if(ecs.valid(root))
 			{
 				if(root != editor_camera)
 				{

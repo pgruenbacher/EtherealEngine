@@ -1,12 +1,12 @@
-// #pragma once
-// #include "../../../ecs/ecs.h"
+#pragma once
+#include "runtime/ecs/ent.h"
 
-// #include <core/reflection/reflection.h>
-// #include <core/serialization/serialization.h>
+#include <core/reflection/reflection.h>
+#include <core/serialization/serialization.h>
 
-// namespace runtime
-// {
-// REFLECT_EXTERN(component);
-// SAVE_EXTERN(component);
-// LOAD_EXTERN(component);
-// }
+namespace ent
+{
+REFLECT_EXTERN(component);
+SAVE_EXTERN(component);
+LOAD_EXTERN(component);
+}

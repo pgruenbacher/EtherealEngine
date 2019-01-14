@@ -15,7 +15,9 @@ void inspector_dock::render(const ImVec2&)
     // PAUL TODO, pass in actor object I think...
     rttr::variant obj = es.selection_data.id;
 		inspect_var(obj);
-	}
+	} else if (es.selection_data.obj) {
+    inspect_var(es.selection_data.obj);
+  }
 }
 
 inspector_dock::inspector_dock(const std::string& dtitle, bool close_button, const ImVec2& min_size)

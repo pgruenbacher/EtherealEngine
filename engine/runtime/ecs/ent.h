@@ -22,8 +22,7 @@ namespace ent {
   template <typename C>
   using chandle = std::weak_ptr<C>;
 
-  class component : public std::enable_shared_from_this<component>
-  {
+  class component : public std::enable_shared_from_this<component> {
     REFLECTABLEV(component)
     SERIALIZABLE(component)
   protected:
@@ -51,10 +50,10 @@ namespace ent {
       return rtti::type_index_sequential_t::id<component, T>();
     }
 
-    chandle<T> handle()
-    {
-      return std::static_pointer_cast<T>(shared_from_this());
-    }
+    // chandle<T> handle()
+    // {
+    //   return std::static_pointer_cast<T>(shared_from_this());
+    // }
 
     void touch()
     {

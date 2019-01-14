@@ -12,6 +12,7 @@ bool inspector_vec2::inspect(rttr::variant& var, bool read_only, const meta_gett
 	return false;
 }
 
+
 bool inspector_vec3::inspect(rttr::variant& var, bool read_only, const meta_getter& get_metadata)
 {
 	auto data = var.get_value<math::vec3>();

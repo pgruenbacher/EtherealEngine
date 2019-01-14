@@ -38,7 +38,7 @@ void picking_system::frame_render(delta_t dt)
 		if(imguizmo::is_over() && es.selection_data.is_any_selected())
 			return;
 
-		if(!editor_camera || !ecs.has<camera_component>(editor_camera))
+		if(editor_camera == entt::null || !ecs.has<camera_component>(editor_camera))
 			return;
 
 		auto& camera_comp = ecs.get<camera_component>(editor_camera);
@@ -102,6 +102,7 @@ void picking_system::frame_render(delta_t dt)
 
 				// auto entity_index = e.id().index();
 				uint32_t entity_index = e;
+				static_assert(std::is_same<EntityType, uint32_t>::value);
 				std::uint32_t rr = (entity_index)&0xff;
 				std::uint32_t gg = (entity_index >> 8) & 0xff;
 				std::uint32_t bb = (entity_index >> 16) & 0xff;
@@ -182,10 +183,11 @@ void picking_system::frame_render(delta_t dt)
 					// if(ecs.valid_index(id_key))
 					if (ecs.valid(id_key))
 					{
+						// std::cout << "PICKED? " << id_key << std::endl;
 						// auto eid = ecs.create_id(id_key);
 						// auto picked_entity = ecs.get(eid);
 						// if(picked_entity) {
-							// es.select(id_key);
+							es.select_ent(id_key);
 						// }
 					}
 					break;

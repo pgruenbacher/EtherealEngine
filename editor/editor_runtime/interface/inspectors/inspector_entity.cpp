@@ -7,7 +7,7 @@
 #include <runtime/ecs/components/camera_component.h>
 
 template<typename C>
-void inspect_component(const Registry& ecs, EntityType ent, bool& changed) {
+void try_inspect_component(const Registry& ecs, EntityType ent, bool& changed) {
 	if (!ecs.has<C>(ent)) return;
 
 	bool opened = true;
@@ -28,7 +28,7 @@ void inspect_component(const Registry& ecs, EntityType ent, bool& changed) {
 		gui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 8.0f);
 		gui::TreePush(name.c_str());
 
-		rttr::variant component_var = component;
+		rttr::variant component_var = &component;
 		changed |= inspect_var(component_var);
 
 		gui::TreePop();
@@ -65,8 +65,8 @@ bool inspector_entity::inspect(rttr::variant& var, bool read_only, const meta_ge
 	}
 	ImGui::Separator();
 
-	inspect_component<transform_component>(ecs, ent, changed);
-	inspect_component<camera_component>(ecs, ent, changed);
+	try_inspect_component<transform_component>(ecs, ent, changed);
+	try_inspect_component<camera_component>(ecs, ent, changed);
 	// auto components = data.all_components();
 	// for(auto& component_ptr : components)
 	// {
@@ -109,43 +109,45 @@ bool inspector_entity::inspect(rttr::variant& var, bool read_only, const meta_ge
 
 	if(gui::BeginPopup("COMPONENT_MENU"))
 	{
-		// static ImGuiTextFilter filter;
-		// filter.Draw("Filter", 180);
-		// gui::Separator();
-		// gui::BeginChild("COMPONENT_MENU_CONTEXT", ImVec2(gui::GetContentRegionAvailWidth(), 200.0f));
+		static ImGuiTextFilter filter;
+		filter.Draw("Filter", 180);
+		gui::Separator();
+		gui::BeginChild("COMPONENT_MENU_CONTEXT", ImVec2(gui::GetContentRegionAvailWidth(), 200.0f));
 
-		// auto component_types = rttr::type::get<ent::component>().get_derived_classes();
+		auto component_types = rttr::type::get<ent::component>().get_derived_classes();
 
-		// for(auto& component_type : component_types)
-		// {
-		// 	// If any constructors registered
-		// 	auto cstructor = component_type.get_constructor();
-		// 	if(cstructor)
-		// 	{
-		// 		std::string name = component_type.get_name().data();
-		// 		auto meta_id = component_type.get_metadata("pretty_name");
-		// 		if(meta_id)
-		// 		{
-		// 			name = meta_id.to_string();
-		// 		}
-		// 		if(!filter.PassFilter(name.c_str()))
-		// 			continue;
+		for(auto& component_type : component_types)
+		{
+			// If any constructors registered
+			auto cstructor = component_type.get_constructor();
+			if(cstructor)
+			{
+				std::string name = component_type.get_name().data();
+				auto meta_id = component_type.get_metadata("pretty_name");
+				if(meta_id)
+				{
+					name = meta_id.to_string();
+				}
+				if(!filter.PassFilter(name.c_str()))
+					continue;
 
-		// 		if(gui::Selectable(name.c_str()))
-		// 		{
-		// 			auto c = cstructor.invoke();
-		// 			auto c_ptr = c.get_value<std::shared_ptr<ent::component>>();
+				if(gui::Selectable(name.c_str()))
+				{
+					auto c = cstructor.invoke();
+					auto c_ptr = c.get_value<std::shared_ptr<ent::component>>();
 
-		// 			if(c_ptr)
-		// 				data.assign(c_ptr);
+					if(c_ptr) {
+						// data.assign(c_ptr);
+						// ecs.assign<
+					}
 
-		// 			gui::CloseCurrentPopup();
-		// 		}
-		// 	}
-		// }
+					gui::CloseCurrentPopup();
+				}
+			}
+		}
 
-		// gui::EndChild();
-		// gui::EndPopup();
+		gui::EndChild();
+		gui::EndPopup();
 	}
 
 	if(changed)

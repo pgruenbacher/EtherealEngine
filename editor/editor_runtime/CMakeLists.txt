@@ -6,7 +6,7 @@ target_link_libraries(editor_lib PUBLIC stdc++fs)
 target_link_libraries(editor_lib PUBLIC editor_core)
 target_link_libraries(editor_lib PUBLIC runtime)
 
-add_executable (editor main.cpp)
+add_executable (editor ${libsrc})
 target_link_libraries(editor PUBLIC stdc++fs)
 target_link_libraries(editor PUBLIC editor_core)
 target_link_libraries(editor PUBLIC runtime)

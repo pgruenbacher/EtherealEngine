@@ -68,6 +68,7 @@ public:
 	void reset_pivot();
 	void set_local_transform(const math::transform& trans);
 	void set_transform(const math::transform& trans);
+	void set_world_transform(const math::transform& trans);
 	void look_at(const math::vec3& eye, const math::vec3& at);
 	void look_at(const math::vec3& eye, const math::vec3& at, const math::vec3& up);
 	bool can_adjust_pivot() const;
@@ -82,14 +83,14 @@ public:
 	// void cleanup_dead_children();
 
 protected:
-    void apply_transform(math::transform& trans);
+    void apply_transform(const math::transform& trans);
     void apply_local_transform(const math::transform& trans);
 
 	//-------------------------------------------------------------------------
 	// Protected Member Variables
 	//-------------------------------------------------------------------------
 	/// Parent object.
-	EntityType parent_;
+	// EntityType parent_;
 	/// Children objects.
 	// std::vector<EntityType> children_;
 	/// Local transformation relative to the parent

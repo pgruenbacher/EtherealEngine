@@ -35,7 +35,7 @@ void picking_system::frame_render(delta_t dt)
 	if(input.is_mouse_button_pressed(mml::mouse::left))
 	{
 		EntityType editor_camera = es.camera;
-		if(imguizmo::is_over() && es.selection_data.object)
+		if(imguizmo::is_over() && es.selection_data.is_any_selected())
 			return;
 
 		if(!editor_camera || !ecs.has<camera_component>(editor_camera))

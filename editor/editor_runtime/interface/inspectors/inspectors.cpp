@@ -1,14 +1,18 @@
 #include "inspectors.h"
 #include <unordered_map>
 #include <vector>
+#include <iostream>
+#include <runtime/ecs/ent.h>
 
 struct inspector_registry
 {
 	inspector_registry()
 	{
+		std::cout << "contruct insp " << std::endl;
 		auto inspector_types = rttr::type::get<inspector>().get_derived_classes();
 		for(auto& inspector_type : inspector_types)
 		{
+			std::cout << "inspector type " << std::endl;
 			auto inspected_type_var = inspector_type.get_metadata("inspected_type");
 			if(inspected_type_var)
 			{
@@ -40,6 +44,7 @@ bool inspect_var(rttr::variant& var, bool skip_custom, bool read_only,
 	bool changed = false;
 
 	auto inspector = get_inspector(type);
+	std::cout << "inspector? " << (inspector || 0) << " " << var.can_convert<EntityType>() << std::endl;
 	if(!skip_custom && inspector)
 	{
 		changed |= inspector->inspect(var, read_only, get_metadata);

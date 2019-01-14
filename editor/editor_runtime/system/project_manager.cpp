@@ -104,7 +104,7 @@ static void add_to_syncer(std::vector<uint64_t>& watchers, fs::syncer& syncer, c
 			});
 	};
 
-	for(const auto& type : ex::get_suported_formats<T>())
+	for(const auto& type : ex::get_supported_formats<T>())
 	{
 		syncer.set_mapping(type + ".meta", {".asset"}, on_modified, on_modified, on_removed, on_renamed);
 		const auto watch_id = watch_assets<T>(dir, "*" + type, true);
@@ -145,7 +145,7 @@ void add_to_syncer<gfx::shader>(std::vector<uint64_t>& watchers, fs::syncer& syn
 			});
 	};
 
-	for(const auto& type : ex::get_suported_formats<gfx::shader>())
+	for(const auto& type : ex::get_supported_formats<gfx::shader>())
 	{
 		syncer.set_mapping(type + ".meta", {".dx11.asset", ".dx12.asset", ".gl.asset"}, on_modified,
 						   on_modified, on_removed, on_renamed);

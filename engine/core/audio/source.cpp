@@ -11,6 +11,7 @@ source::source()
 source::~source() = default;
 
 source::source(source&&) noexcept = default;
+source::source(const source&) : source() {} // make new unique ptr.
 source& source::operator=(source&&) noexcept = default;
 
 void source::play()

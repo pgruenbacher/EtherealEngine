@@ -29,7 +29,8 @@ public:
     // using std::move when part of its parent component
     listener(listener&& o);
     void operator=(listener&& o);
-
+    // also required for deserialization into ecs
+    listener(const listener&);
     //-----------------------------------------------------------------------------
     //  Name : set_volume ()
     /// <summary>

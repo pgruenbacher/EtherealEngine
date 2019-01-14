@@ -17,9 +17,23 @@ namespace editor
 {
 struct editing_system
 {
-	struct selection
-	{
-		rttr::variant object;
+	// struct selection
+	// {
+	// 	rttr::variant object;
+	// };
+	struct selection {
+		rttr::variant obj;
+		EntityType id;
+		bool is_any_selected() {
+			return is_ent_selected() || obj;
+		}
+		bool is_ent_selected() {
+			return id != entt::null;
+		}
+		void reset() {
+			obj = {};
+			id = entt::null;
+		}
 	};
 
 	struct snap
@@ -60,8 +74,8 @@ struct editing_system
 	/// Selects an object. Can be anything.
 	/// </summary>
 	//-----------------------------------------------------------------------------
-	void select(rttr::variant object);
-
+	void select_ent(EntityType id);
+	void select_variant(rttr::variant obj);
 	//-----------------------------------------------------------------------------
 	//  Name : unselect ()
 	/// <summary>
@@ -79,7 +93,7 @@ struct editing_system
 	template <typename T>
 	void try_unselect()
 	{
-		if(selection_data.object.is_type<T>())
+		if(selection_data.obj.is_type<T>())
 		{
 			unselect();
 		}

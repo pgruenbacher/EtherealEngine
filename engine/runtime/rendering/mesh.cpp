@@ -70,8 +70,10 @@ void mesh::dispose()
 	triangle_data_.clear();
 
 	// Release resources
-	hardware_vb_.reset();
-	hardware_ib_.reset();
+	// paul - is this actually necessary to reset?
+	// can lead to segfaults if the vb is not set when making and destroy mesh.
+	// hardware_vb_.reset();
+	// hardware_ib_.reset();
 
 	// Clear variables
 	preparation_data_.vertex_source = nullptr;

@@ -350,6 +350,11 @@ private:
 	}
 
 public:
+	// default empty parser to allow for non-cli unittests.
+	explicit parser()
+		: appname_()
+	{
+	}
 	explicit parser(int argc, const char** argv)
 		: appname_(argv[0])
 	{

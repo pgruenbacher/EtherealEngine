@@ -13,6 +13,8 @@ class render_window;
 
 namespace editor
 {
+
+
 class app : public runtime::app
 {
 public:
@@ -23,6 +25,10 @@ public:
 	virtual void start(cmd_line::parser& parser);
 
 	virtual void stop();
+
+public:
+	// for unit-test handles
+	void create_new_scene();
 
 private:
 	void create_docks();

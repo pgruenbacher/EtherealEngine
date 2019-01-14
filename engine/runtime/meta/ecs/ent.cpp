@@ -58,7 +58,7 @@ LOAD(EntityType)
  //   else
  //   {
  //     auto& ecs = core::get_subsystem<SpatialSystem>();
- //     obj = ecs.create();
+ //     obj = factory.create();
  //     serialization_map[id] = obj;
 
  //     try_load(ar, cereal::make_nvp("name", name));

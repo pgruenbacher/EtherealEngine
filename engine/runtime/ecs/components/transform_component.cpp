@@ -416,8 +416,10 @@ void transform_component::set_transform(const math::transform& tr)
 	apply_transform(m);
 }
 
-void transform_component::apply_transform(math::transform& trans)
+void transform_component::apply_transform(const math::transform& trans)
 {
+	// eh just find the parent outside maybe...
+
 	// if(parent_.valid())
 	// {
 	// 	auto parent_transform = parent_.get_component<transform_component>().lock();
@@ -427,7 +429,6 @@ void transform_component::apply_transform(math::transform& trans)
 	// 		trans = inv_parent_transform * trans;
 	// 	}
 	// }
-
 	set_local_transform(trans);
 }
 
@@ -448,6 +449,10 @@ void transform_component::set_local_transform(const math::transform& trans)
 	}
 
 	apply_local_transform(trans);
+}
+
+void transform_component::set_world_transform(const math::transform& trans) {
+	world_transform_ = trans;
 }
 
 void transform_component::resolve(bool force)

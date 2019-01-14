@@ -32,7 +32,7 @@ static bool process_drag_drop_target(asset_handle<asset_t>& entry)
 			gui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
 		}
 
-		for(const auto& type : ex::get_suported_formats<asset_t>())
+		for(const auto& type : ex::get_supported_formats<asset_t>())
 		{
 			auto payload = gui::AcceptDragDropPayload(type.c_str());
 			if(payload)
@@ -65,7 +65,7 @@ bool inspector_asset_handle_texture::inspect(rttr::variant& var, bool read_only,
 	auto data = var.get_value<asset_handle<gfx::texture>>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
-	auto& selected = es.selection_data.object;
+	auto& selected = es.selection_data.obj;
 	bool is_selected = selected && selected.is_type<asset_handle<gfx::texture>>();
 	bool changed = false;
 
@@ -193,7 +193,7 @@ bool inspector_asset_handle_material::inspect(rttr::variant& var, bool read_only
 
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
-	auto& selected = es.selection_data.object;
+	auto& selected = es.selection_data.obj;
 	if(selected && !selected.is_type<asset_handle<material>>())
 	{
 		std::string item = !data.id().empty() ? data.id() : "none";
@@ -250,7 +250,7 @@ bool inspector_asset_handle_mesh::inspect(rttr::variant& var, bool read_only, co
 
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
-	auto& selected = es.selection_data.object;
+	auto& selected = es.selection_data.obj;
 	if(selected && !selected.is_type<asset_handle<mesh>>())
 	{
 		std::string item = !data.id().empty() ? data.id() : "none";
@@ -318,7 +318,7 @@ bool inspector_asset_handle_animation::inspect(rttr::variant& var, bool read_onl
 
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
-	auto& selected = es.selection_data.object;
+	auto& selected = es.selection_data.obj;
 	if(selected && !selected.is_type<asset_handle<runtime::animation>>())
 	{
 		std::string item = !data.id().empty() ? data.id() : "none";
@@ -367,7 +367,7 @@ bool inspector_asset_handle_sound::inspect(rttr::variant& var, bool read_only,
 
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
-	auto& selected = es.selection_data.object;
+	auto& selected = es.selection_data.obj;
 	if(selected && !selected.is_type<asset_handle<audio::sound>>())
 	{
 		std::string item = !data.id().empty() ? data.id() : "none";
@@ -431,7 +431,7 @@ bool inspector_asset_handle_prefab::inspect(rttr::variant& var, bool read_only,
 
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
-	auto& selected = es.selection_data.object;
+	auto& selected = es.selection_data.obj;
 	if(selected && !selected.is_type<asset_handle<prefab>>())
 	{
 		std::string item = !data.id().empty() ? data.id() : "none";

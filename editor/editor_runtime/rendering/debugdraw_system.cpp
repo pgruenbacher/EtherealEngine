@@ -24,7 +24,8 @@ void debugdraw_system::frame_render(delta_t)
 	auto& es = core::get_subsystem<editing_system>();
 	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& editor_camera = es.camera;
-	auto& selected = es.selection_data.object;
+	bool selected = es.selection_data.is_ent_selected();
+	EntityType selected_entity = es.selection_data.id;
 	if (editor_camera != entt::null || !ecs.has<camera_component>(editor_camera))
 		return;
 
@@ -93,12 +94,12 @@ void debugdraw_system::frame_render(delta_t)
 		}
 	}
 
-	if(!selected || !selected.is_type<EntityType>())
+	if(!selected)
 		return;
 
-	auto selected_entity = selected.get_value<EntityType>();
+	// auto selected_entity = selected.get_value<EntityType>();
 
-	if(selected_entity != entt::null || !ecs.has<transform_component>(selected_entity))
+	if(!ecs.has<transform_component>(selected_entity))
 		return;
 
 	const auto& transform_comp = ecs.get<transform_component>(selected_entity);
@@ -199,41 +200,41 @@ void debugdraw_system::frame_render(delta_t)
 		}
 	}
 
-	// if(selected_entity.has_component<reflection_probe_component>())
-	// {
-	// 	const auto probe_comp = selected_entity.get_component<reflection_probe_component>();
-	// 	const auto probe_comp_ptr = probe_comp.lock().get();
-	// 	const auto& probe = probe_comp_ptr->get_probe();
-	// 	if(probe.type == probe_type::box)
-	// 	{
-	// 		dd.encoder.push();
-	// 		dd.encoder.setColor(0xff00ff00);
-	// 		dd.encoder.setWireframe(true);
-	// 		dd.encoder.pushTransform(&world_transform);
-	// 		Aabb aabb;
-	// 		aabb.m_min.x = -probe.box_data.extents.x;
-	// 		aabb.m_min.y = -probe.box_data.extents.y;
-	// 		aabb.m_min.z = -probe.box_data.extents.z;
-	// 		aabb.m_max.x = probe.box_data.extents.x;
-	// 		aabb.m_max.y = probe.box_data.extents.y;
-	// 		aabb.m_max.z = probe.box_data.extents.z;
-	// 		dd.encoder.draw(aabb);
-	// 		dd.encoder.popTransform();
-	// 		dd.encoder.pop();
-	// 	}
-	// 	else
-	// 	{
-	// 		auto radius = probe.sphere_data.range;
-	// 		dd.encoder.push();
-	// 		dd.encoder.setColor(0xff00ff00);
-	// 		dd.encoder.setWireframe(true);
-	// 		math::vec3 center = transform_comp.get_position();
-	// 		dd.encoder.drawCircle(Axis::X, center.x, center.y, center.z, radius);
-	// 		dd.encoder.drawCircle(Axis::Y, center.x, center.y, center.z, radius);
-	// 		dd.encoder.drawCircle(Axis::Z, center.x, center.y, center.z, radius);
-	// 		dd.encoder.pop();
-	// 	}
-	// }
+	if(ecs.has<reflection_probe_component>(selected_entity))
+	{
+		const auto& probe_comp = ecs.get<reflection_probe_component>(selected_entity);
+		// const auto probe_comp_ptr = probe_comp.lock().get();
+		const auto& probe = probe_comp.get_probe();
+		if(probe.type == probe_type::box)
+		{
+			dd.encoder.push();
+			dd.encoder.setColor(0xff00ff00);
+			dd.encoder.setWireframe(true);
+			dd.encoder.pushTransform(&world_transform);
+			Aabb aabb;
+			aabb.m_min.x = -probe.box_data.extents.x;
+			aabb.m_min.y = -probe.box_data.extents.y;
+			aabb.m_min.z = -probe.box_data.extents.z;
+			aabb.m_max.x = probe.box_data.extents.x;
+			aabb.m_max.y = probe.box_data.extents.y;
+			aabb.m_max.z = probe.box_data.extents.z;
+			dd.encoder.draw(aabb);
+			dd.encoder.popTransform();
+			dd.encoder.pop();
+		}
+		else
+		{
+			auto radius = probe.sphere_data.range;
+			dd.encoder.push();
+			dd.encoder.setColor(0xff00ff00);
+			dd.encoder.setWireframe(true);
+			math::vec3 center = transform_comp.get_position();
+			dd.encoder.drawCircle(Axis::X, center.x, center.y, center.z, radius);
+			dd.encoder.drawCircle(Axis::Y, center.x, center.y, center.z, radius);
+			dd.encoder.drawCircle(Axis::Z, center.x, center.y, center.z, radius);
+			dd.encoder.pop();
+		}
+	}
 
 	if(ecs.has<model_component>(selected_entity))
 	{

@@ -26,6 +26,13 @@ renderer::renderer(cmd_line::parser& parser)
 	desktop.width = 1280;
 	desktop.height = 720;
 	auto window = std::make_unique<render_window>(desktop, "ETHEREAL", mml::style::standard);
+
+	bool noRender;
+	if (parser.try_get("norender", noRender)) {
+		// we'll just hide the window...
+		window->set_visible(false);
+	}
+
 	window->request_focus();
 	register_window(std::move(window));
 	process_pending_windows();
@@ -175,7 +182,8 @@ bool renderer::init_backend(cmd_line::parser& parser)
 	init_data.type = preferred_renderer_type;
 	init_data.resolution.width = sz[0];
 	init_data.resolution.height = sz[1];
-	init_data.resolution.reset = BGFX_RESET_VSYNC;
+	// init_data.resolution.reset = BGFX_RESET_VSYNC;
+	// disable for linux...
 
 	bool novsync = false;
 	parser.try_get("novsync", novsync);

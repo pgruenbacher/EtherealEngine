@@ -74,20 +74,22 @@ std::vector<EntityType> gather_scene_data()
 	return entities;
 }
 
+
 void default_scene()
 {
 	auto& am = core::get_subsystem<runtime::asset_manager>();
 	auto& ecs = core::get_subsystem<SpatialSystem>();
+	auto factory = ecs::utils::get_default_ent_factory(ecs);
 
 	{
-		auto object = ecs.create();
+		auto object = factory.create();
 		ecs.get<Name>(object).name = ("main camera");
 		auto& transf_comp = ecs.assign<transform_component>(object);
 		transf_comp.set_local_position({0.0f, 2.0f, -5.0f});
 		ecs.assign<camera_component>(object);
 	}
 	{
-		auto object = ecs.create();
+		auto object = factory.create();
 		ecs.get<Name>(object).name = ("light");
 		auto& transf_comp = ecs.assign<transform_component>(object);
 		transf_comp.set_local_position({1.0f, 6.0f, -3.0f});
@@ -99,7 +101,7 @@ void default_scene()
 		light_comp.set_light(light_data);
 	}
 	{
-		auto object = ecs.create();
+		auto object = factory.create();
 		ecs.get<Name>(object).name = ("global probe");
 		auto& transf_comp = ecs.assign<transform_component>(object);
 		transf_comp.set_local_position({0.0f, 0.1f, 0.0f});
@@ -112,7 +114,7 @@ void default_scene()
 		// reflect_comp->set_probe(probe);
 	}
 	{
-		auto object = ecs.create();
+		auto object = factory.create();
 		ecs.get<Name>(object).name = ("local probe");
 		auto& transf_comp = ecs.assign<transform_component>(object);
 		transf_comp.set_local_position({0.0f, 0.1f, 0.0f});
@@ -124,7 +126,7 @@ void default_scene()
 		// reflect_comp->set_probe(probe);
 	}
 	{
-		auto object = ecs.create();
+		auto object = factory.create();
 		ecs.get<Name>(object).name = ("platform");
 		ecs.assign<transform_component>(object);
 
@@ -139,7 +141,7 @@ void default_scene()
 		model_comp.set_model(model);
 	}
 	{
-		auto object = ecs.create();
+		auto object = factory.create();
 		ecs.get<Name>(object).name = ("object");
 		auto& transf_comp = ecs.assign<transform_component>(object);
 		transf_comp.set_local_position({-2.0f, 0.5f, 0.0f});
@@ -156,7 +158,7 @@ void default_scene()
 	}
 
 	{
-		auto object = ecs.create();
+		auto object = factory.create();
 		ecs.get<Name>(object).name = ("object_with_lods");
 		auto& transf_comp = ecs.assign<transform_component>(object);
 		transf_comp.set_local_position({2.0f, 1.0f, 0.0f});
@@ -182,16 +184,6 @@ void default_scene()
 	}
 }
 
-auto create_new_scene()
-{
-	auto& es = core::get_subsystem<editor::editing_system>();
-	auto& ecs = core::get_subsystem<SpatialSystem>();
-	es.save_editor_camera();
-	ecs.reset();
-	es.load_editor_camera();
-	default_scene();
-	es.scene.clear();
-}
 
 auto open_scene()
 {
@@ -204,7 +196,9 @@ auto open_scene()
 	{
 		auto scene_path = fs::convert_to_protocol(path);
 		auto scene = am.load<::scene>(scene_path.string()).get();
+		APPLOG_INFO("Loading scene...");
 		scene->instantiate(::scene::mode::standard);
+		APPLOG_INFO("Instantiated scene...");
 		es.load_editor_camera();
 		es.scene = path;
 	}
@@ -217,7 +211,8 @@ auto save_scene()
 	if(path != "")
 	{
 		auto entities = gather_scene_data();
-		ecs::utils::save_entities_to_file(path, std::move(entities));
+		// ecs::utils::save_entities_to_file(path, std::move(entities));
+		ecs::utils::save_entities_to_file(path, (entities));
 		APPLOG_INFO("Saving scene successful.");
 	}
 
@@ -240,6 +235,18 @@ void save_scene_as()
 
 	es.save_editor_camera();
 }
+} // anonymous namespace
+
+
+void app::create_new_scene()
+{
+	auto& es = core::get_subsystem<editor::editing_system>();
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+	es.save_editor_camera();
+	ecs.reset();
+	es.load_editor_camera();
+	default_scene();
+	es.scene.clear();
 }
 
 void app::draw_menubar(render_window& window)
@@ -450,7 +457,14 @@ void app::start(cmd_line::parser& parser)
 	core::add_subsystem<debugdraw_system>();
 	core::add_subsystem<project_manager>();
 
-	create_docks();
+	bool result;
+	if (parser.try_get("norender", result)) {
+		// don't make window if running unittests.
+		APPLOG_INFO("norender: skipping create docks");
+	} else {
+		create_docks();
+		APPLOG_INFO("creating docks");
+	}
 	register_console_commands();
 }
 

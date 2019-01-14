@@ -62,5 +62,8 @@ bool load_entities_from_file(const fs::path& full_path, std::vector<EntityType>&
 /// </summary>
 //-----------------------------------------------------------------------------
 bool deserialize_data(std::istream& stream, std::vector<EntityType>& out_data);
+
+
+entt::prototype<EntityType> get_default_ent_factory(Registry& reg);
 }
 }

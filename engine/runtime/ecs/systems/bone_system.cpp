@@ -3,7 +3,7 @@
 #include "../../system/events.h"
 #include "../components/model_component.h"
 #include "../components/transform_component.h"
-
+#include <runtime/ecs/constructs/utils.h>
 #include <core/system/subsystem.h>
 
 namespace runtime
@@ -15,8 +15,8 @@ void process_node(const std::unique_ptr<mesh::armature_node>& node, const skin_b
 {
 	// if(!parent.valid())
 	// 	return;
-
-	auto entity_node = ecs.create();
+	auto factory = ecs::utils::get_default_ent_factory(ecs);
+	auto entity_node = factory.create();
 	// entity_node.set_name(node->name);
 
 	auto& transf_comp = ecs.assign<transform_component>(entity_node);

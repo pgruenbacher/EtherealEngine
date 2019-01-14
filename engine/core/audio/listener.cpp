@@ -16,6 +16,13 @@ listener::listener(listener&& o) :
     impl_(std::move(o.impl_))
 {
 }
+
+listener::listener(const listener&) :
+    impl_(std::make_unique<priv::listener_impl>())
+{
+
+}
+
 void listener::operator=(listener&& o)
 {
     impl_ = (std::move(o.impl_));

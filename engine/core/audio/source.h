@@ -28,7 +28,8 @@ public:
     source(source&& rhs) noexcept;
     source& operator=(source&& rhs) noexcept;
 
-    source(const source& rhs) = delete;
+    // source(const source& rhs) = delete;
+    source(const source& rhs); // used by ecs
     source& operator=(const source& rhs) = delete;
 
     //-----------------------------------------------------------------------------

@@ -275,16 +275,18 @@ void draw_selected_camera(const ImVec2& size)
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& ecs = core::get_subsystem<SpatialSystem>();
-	auto& selected = es.selection_data.object;
+	// auto& selected = es.selection_data.object;
+	bool selected = es.selection_data.is_ent_selected();
+	EntityType selected_id = es.selection_data.id;
 	auto& editor_camera = es.camera;
 
-	if(selected.is_type<EntityType>())
+	if(selected)
 	{
-		auto sel = selected.get_value<EntityType>();
+		// auto sel = selected.get_value<EntityType>();
 
-		if(sel && (editor_camera != sel) && ecs.has<camera_component>(sel))
+		if((editor_camera != selected_id) && ecs.has<camera_component>(selected_id))
 		{
-			auto& selected_camera = ecs.get<camera_component>(sel);
+			auto& selected_camera = ecs.get<camera_component>(selected_id);
 			const auto& camera = selected_camera.get_camera();
 			auto& render_view = selected_camera.get_render_view();
 			auto& viewport_size = camera.get_viewport_size();
@@ -307,10 +309,10 @@ void draw_selected_camera(const ImVec2& size)
 			}
 			gui::End();
 
-			if(input.is_key_pressed(mml::keyboard::F) && ecs.has<transform_component>(sel))
+			if(input.is_key_pressed(mml::keyboard::F) && ecs.has<transform_component>(selected_id))
 			{
 				auto& transform = ecs.get<transform_component>(editor_camera);
-				auto& transform_selected = ecs.get<transform_component>(sel);
+				auto& transform_selected = ecs.get<transform_component>(selected_id);
 				transform_selected.set_transform(transform.get_transform());
 			}
 		}
@@ -322,7 +324,9 @@ void manipulation_gizmos()
 	auto& input = core::get_subsystem<runtime::input>();
 	auto& es = core::get_subsystem<editor::editing_system>();
 	auto& ecs = core::get_subsystem<SpatialSystem>();
-	auto& selected = es.selection_data.object;
+	// auto& selected = es.selection_data.object;
+	bool selected = es.selection_data.is_ent_selected();
+	EntityType selected_id = es.selection_data.id;
 	auto& editor_camera = es.camera;
 	auto& operation = es.operation;
 	auto& mode = es.mode;
@@ -352,16 +356,16 @@ void manipulation_gizmos()
 		}
 	}
 
-	if(selected && selected.is_type<EntityType>())
+	if(selected)
 	{
-		auto sel = selected.get_value<EntityType>();
-		if(sel && sel != editor_camera && ecs.has<transform_component>(sel))
+		// auto sel = selected.get_value<EntityType>();
+		if(selected_id != editor_camera && ecs.has<transform_component>(selected_id))
 		{
 			auto p = gui::GetItemRectMin();
 			auto s = gui::GetItemRectSize();
 			imguizmo::set_view_rect(p.x, p.y, s.x, s.y);
 			const auto& camera_comp = ecs.get<camera_component>(editor_camera);
-			auto& transform_comp = ecs.get<transform_component>(sel);
+			auto& transform_comp = ecs.get<transform_component>(selected_id);
 			auto transform = transform_comp.get_transform();
 			math::transform delta;
 			float* snap = nullptr;
@@ -387,9 +391,10 @@ void manipulation_gizmos()
 
 			transform_comp.set_transform(output);
 
-//						if(sel.has_component<model_component>())
+//						commented by original author...
+//						if(selected_id.has_component<model_component>())
 //						{
-//							const auto model_comp = sel.get_component<model_component>();
+//							const auto model_comp = selected_id.get_component<model_component>();
 //							const auto model_comp_ptr = model_comp.lock().get();
 //							const auto& model = model_comp_ptr->get_model();
 //							if(!model.is_valid())
@@ -423,10 +428,14 @@ void handle_camera_movement()
 
 	auto& editor_camera = es.camera;
 	auto dt = sim.get_delta_time().count();
-
+	if (editor_camera == entt::null) {
+		return;
+	}
 	auto& transform = ecs.get<transform_component>(editor_camera);
 	float movement_speed = 5.0f;
 	float rotation_speed = 0.2f;
+	// for linux bump up the speed
+	rotation_speed = 0.8f;
 	float multiplier = 5.0f;
 	auto delta_move = input.get_cursor_delta_move();
 
@@ -526,7 +535,7 @@ static void process_drag_drop_target(camera_component& camera_comp){
 	auto& ecs = core::get_subsystem<SpatialSystem>();
 	auto& am = core::get_subsystem<runtime::asset_manager>();
 	auto& es = core::get_subsystem<editor::editing_system>();
-
+	auto factory = ecs::utils::get_default_ent_factory(ecs);
 	if(gui::BeginDragDropTarget())
 	{
 		if(gui::IsDragDropPayloadBeingAccepted())
@@ -538,7 +547,7 @@ static void process_drag_drop_target(camera_component& camera_comp){
 			gui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
 		}
 
-		for(const auto& type : ex::get_suported_formats<prefab>())
+		for(const auto& type : ex::get_supported_formats<prefab>())
 		{
 			auto payload = gui::AcceptDragDropPayload(type.c_str());
 			if(payload != nullptr)
@@ -573,11 +582,11 @@ static void process_drag_drop_target(camera_component& camera_comp){
 							trans_comp.set_position(projected_pos);
 						}
 					}
-					es.select(object);
+					es.select_ent(object);
 				}
 			}
 		}
-		for(const auto& type : ex::get_suported_formats<mesh>())
+		for(const auto& type : ex::get_supported_formats<mesh>())
 		{
 			auto payload = gui::AcceptDragDropPayload(type.c_str());
 			if(payload != nullptr)
@@ -599,7 +608,7 @@ static void process_drag_drop_target(camera_component& camera_comp){
 					model mdl;
 					mdl.set_lod(entry, 0);
 
-					auto object = ecs.create();
+					auto object = factory.create();
 					// Add component and configure it.
 					auto& trans_comp = ecs.assign<transform_component>(object);
 					// if(trans_comp)
@@ -622,7 +631,7 @@ static void process_drag_drop_target(camera_component& camera_comp){
 					model_comp.set_casts_reflection(false);
 					model_comp.set_model(mdl);
 
-					es.select(object);
+					es.select_ent(object);
 				}
 			}
 		}
@@ -640,14 +649,14 @@ void scene_dock::render(const ImVec2& area)
 	auto& sim = core::get_subsystem<core::simulation>();
 
 	auto window = renderer.get_focused_window();
-	auto& editor_camera = es.camera;
-	auto& selected = es.selection_data.object;
+	EntityType editor_camera = es.camera;
+	// auto& selected = es.selection_data.object;
+	bool selected = es.selection_data.is_ent_selected();
+	EntityType selected_id = es.selection_data.id;
 
-	bool has_edit_camera = editor_camera && ecs.has<camera_component>(editor_camera) &&
-						   ecs.has<transform_component>(editor_camera);
+	bool has_edit_camera = editor_camera != entt::null && ecs.has<camera_component>(editor_camera);
 
 	show_statistics(area, sim.get_fps(), show_gbuffer);
-
 	if(!has_edit_camera)
 	{
 		return;
@@ -692,13 +701,13 @@ void scene_dock::render(const ImVec2& area)
 
 			if(input.is_key_pressed(mml::keyboard::Delete))
 			{
-				if(selected && selected.is_type<EntityType>())
+				if(selected)
 				{
-					auto sel = selected.get_value<EntityType>();
-					if(sel && sel != editor_camera)
+					// auto sel = selected.get_value<EntityType>();
+					if(selected_id != editor_camera)
 					{
 						// sel.destroy();
-						ecs.get<MarkDelete>(sel).markDelete();
+						ecs.get<MarkDelete>(selected_id).markDelete();
 						es.unselect();
 					}
 				}
@@ -708,15 +717,15 @@ void scene_dock::render(const ImVec2& area)
 			{
 				if(input.is_key_down(mml::keyboard::LControl))
 				{
-					if(selected && selected.is_type<EntityType>())
+					if(selected)
 					{
-						auto sel = selected.get_value<EntityType>();
-						if(sel && sel != editor_camera)
+						// auto sel = selected.get_value<EntityType>();
+						if(selected_id != editor_camera)
 						{
-							auto clone = ecs::utils::clone_entity(sel);
+							EntityType clone = ecs::utils::clone_entity(selected_id);
 							// ecs.get<transform_component>(clone).set_parent(
 							// ecs.get<transform_component>(sel).get_parent(), false, true);
-							// es.select(clone);
+							es.select_ent(clone);
 						}
 					}
 				}

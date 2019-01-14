@@ -434,8 +434,9 @@ void project_dock::render(const ImVec2& /*area*/)
 	if(gui::BeginChild("assets_content", gui::GetContentRegionAvail(), false, flags))
 	{
 		const auto is_selected = [&](const auto& entry) {
+			// is_selected checks variants...
 			using entry_t = std::decay_t<decltype(entry)>;
-			auto& selected = es.selection_data.object;
+			auto& selected = es.selection_data.obj;
 
 			bool is_selected = selected.is_type<entry_t>() ? (selected.get_value<entry_t>() == entry) : false;
 			return is_selected;
@@ -482,7 +483,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				const auto& icon = folder_preview;
 				is_popup_opened |= draw_entry(icon, false, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  [&]() // on_double_click
 											  {
 												  current_path = entry;
@@ -519,7 +520,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				bool is_loading = !entry;
 				is_popup_opened |= draw_entry(icon, is_loading, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  nullptr, // on_double_click
 											  on_rename, on_delete);
 				return;
@@ -540,7 +541,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				bool is_loading = !entry;
 				is_popup_opened |= draw_entry(icon, is_loading, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  nullptr, // on_double_click
 											  on_rename, on_delete);
 
@@ -561,7 +562,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				bool is_loading = !entry;
 				is_popup_opened |= draw_entry(icon, is_loading, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  nullptr, // on_double_click
 											  on_rename, on_delete);
 				return;
@@ -581,7 +582,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				bool is_loading = !entry;
 				is_popup_opened |= draw_entry(icon, is_loading, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  nullptr, // on_double_click
 											  on_rename, on_delete);
 
@@ -602,7 +603,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				bool is_loading = !entry;
 				is_popup_opened |= draw_entry(icon, is_loading, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  nullptr, // on_double_click
 											  on_rename, on_delete);
 
@@ -623,7 +624,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				bool is_loading = !entry;
 				is_popup_opened |= draw_entry(icon, is_loading, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  nullptr, // on_double_click
 											  on_rename, on_delete);
 
@@ -644,7 +645,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				bool is_loading = !entry;
 				is_popup_opened |= draw_entry(icon, is_loading, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  nullptr, // on_double_click
 											  on_rename, on_delete);
 
@@ -665,7 +666,7 @@ void project_dock::render(const ImVec2& /*area*/)
 				bool is_loading = !entry;
 				is_popup_opened |= draw_entry(icon, is_loading, name, absolute_path, is_selected(entry), size,
 											  [&]() // on_click
-											  { es.select(entry); },
+											  { es.select_variant(entry); },
 											  [&]() // on_double_click
 											  {
 												  if(!entry)

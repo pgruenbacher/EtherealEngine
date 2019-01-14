@@ -46,7 +46,7 @@ editing_system::editing_system()
 
 void editing_system::save_editor_camera()
 {
-	if(camera)
+	if(camera != entt::null)
 		ecs::utils::save_entity_to_file(fs::resolve_protocol("app:/settings/editor_camera.cfg"), camera);
 }
 
@@ -57,7 +57,8 @@ void editing_system::load_editor_camera()
 											  object))
 	{
 		auto& ecs = core::get_subsystem<SpatialSystem>();
-		object = ecs.create();
+		auto factory = ecs::utils::get_default_ent_factory(ecs);
+		object = factory.create();
 	}
 	auto& ecs = core::get_subsystem<SpatialSystem>();
 	ecs.assign<Name>(object, "EDITOR CAMERA");
@@ -79,14 +80,24 @@ void editing_system::load_editor_camera()
 	camera = object;
 }
 
-void editing_system::select(rttr::variant object)
-{
-	selection_data.object = object;
+
+void editing_system::select_ent(EntityType id) {
+	selection_data.reset();
+	selection_data.id = id;
 }
+void editing_system::select_variant(rttr::variant obj) {
+	selection_data.reset();
+	selection_data.obj = obj;
+}
+
+// void editing_system::select(EntityType object)
+// {
+// 	selection_data.object = object;
+// }
 
 void editing_system::unselect()
 {
-	selection_data = {};
+	selection_data.reset();
 	imguizmo::enable(false);
 	imguizmo::enable(true);
 }

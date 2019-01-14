@@ -4,8 +4,10 @@
 
 #include "../assets/asset_manager.h"
 #include "../ecs/ent.h"
+#include <runtime/ecs/components/relation.h>
 #include "../ecs/systems/audio_system.h"
 #include "../ecs/systems/bone_system.h"
+#include "../ecs/systems/transform_system.h"
 #include "../ecs/systems/camera_system.h"
 #include "../ecs/systems/deferred_rendering.h"
 #include "../ecs/systems/reflection_probe_system.h"
@@ -51,7 +53,10 @@ void app::setup(cmd_line::parser& parser)
 
 void app::start(cmd_line::parser& parser)
 {
+
 	// this order is important
+	core::add_subsystem<SpatialSystem>();
+	core::add_subsystem<transform_system>();
 	core::add_subsystem<core::simulation>();
 	core::add_subsystem<renderer>(parser);
 	core::add_subsystem<input>();
@@ -65,7 +70,6 @@ void app::start(cmd_line::parser& parser)
 	core::add_subsystem<reflection_probe_system>();
 	core::add_subsystem<deferred_rendering>();
 	core::add_subsystem<audio_system>();
-	core::add_subsystem<SpatialSystem>();
 }
 
 void app::stop()
@@ -109,6 +113,16 @@ void poll_events()
 	}
 }
 
+void delete_marked_ents() {
+	auto& ecs = core::get_subsystem<SpatialSystem>();
+	auto view = ecs.view<MarkDelete>();
+	for (auto ent : view) {
+		if (view.get(ent).should_destroy()) {
+			ecs.destroy(ent);
+		}
+	}
+}
+
 void app::run_one_frame()
 {
 	using namespace std::literals;
@@ -144,6 +158,20 @@ void app::run_one_frame()
 	on_frame_ui_render(dt);
 
 	on_frame_end(dt);
+
+	delete_marked_ents();
+}
+
+void app::setup_testing() {
+	core::details::initialize();
+	cmd_line::parser parser;
+  parser.set_optional<bool>("norender", "", true);
+	std::stringstream out, err;
+  parser.run(out, err);
+  bool result;
+  expects(parser.try_get("norender", result));
+	setup(parser);
+	start(parser);
 }
 
 int app::run(int argc, char* argv[])

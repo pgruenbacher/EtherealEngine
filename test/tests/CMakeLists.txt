@@ -53,5 +53,5 @@ add_custom_target(check ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1
                   ${CMAKE_CTEST_COMMAND} -C $<CONFIG> --verbose
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
-target_link_libraries(unit_tests runtime editor_core)
+target_link_libraries(unit_tests runtime editor_core editor_lib)
 target_link_libraries(unit_tests libgtest)

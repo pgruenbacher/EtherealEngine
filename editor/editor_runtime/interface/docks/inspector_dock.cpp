@@ -8,10 +8,13 @@ void inspector_dock::render(const ImVec2&)
 {
 	auto& es = core::get_subsystem<editor::editing_system>();
 
-	auto& selected = es.selection_data.object;
+	// auto& selected = es.selection_data.object;
+  bool selected = es.selection_data.is_ent_selected();
 	if(selected)
 	{
-		inspect_var(selected);
+    // PAUL TODO, pass in actor object I think...
+    rttr::variant obj = es.selection_data.id;
+		inspect_var(obj);
 	}
 }
 

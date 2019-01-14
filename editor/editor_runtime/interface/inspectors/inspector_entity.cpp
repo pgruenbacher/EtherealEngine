@@ -66,39 +66,9 @@ bool inspector_entity::inspect(rttr::variant& var, bool read_only, const meta_ge
 	ImGui::Separator();
 
 	try_inspect_component<transform_component>(ecs, ent, changed);
+	try_inspect_component<light_component>(ecs, ent, changed);
 	try_inspect_component<camera_component>(ecs, ent, changed);
-	// auto components = data.all_components();
-	// for(auto& component_ptr : components)
-	// {
-	// 	bool opened = true;
-	// 	auto component = component_ptr.lock().get();
-	// 	auto component_type = rttr::type::get(*component);
 
-	// 	std::string name = component_type.get_name().data();
-	// 	auto meta_id = component_type.get_metadata("pretty_name");
-	// 	if(meta_id)
-	// 	{
-	// 		name = meta_id.to_string();
-	// 	}
-	// 	gui::PushID(component);
-	// 	gui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
-	// 	if(gui::CollapsingHeader(name.c_str(), &opened))
-	// 	{
-	// 		gui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 8.0f);
-	// 		gui::TreePush(name.c_str());
-
-	// 		rttr::variant component_var = component;
-	// 		changed |= inspect_var(component_var);
-
-	// 		gui::TreePop();
-	// 		gui::PopStyleVar();
-	// 	}
-	// 	gui::PopID();
-	// 	if(!opened)
-	// 	{
-	// 		component->get_entity().remove(component_ptr.lock());
-	// 	}
-	// }
 
 	gui::Separator();
 	if(gui::Button("+COMPONENT"))

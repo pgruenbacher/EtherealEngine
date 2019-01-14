@@ -2,6 +2,7 @@
 
 #include <core/reflection/reflection.h>
 #include <core/reflection/registration.h>
+#include <runtime/ecs/ent.h>
 #include <iostream>
 #include <editor_core/gui/gui.h>
 
@@ -14,6 +15,7 @@ struct inspector
 	virtual ~inspector() = default;
 
 	virtual bool inspect(rttr::variant& var, bool read_only, const meta_getter& get_metadata) = 0;
+
 };
 
 struct property_layout

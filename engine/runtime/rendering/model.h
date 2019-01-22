@@ -199,5 +199,5 @@ private:
 	///
 	std::vector<urange32_t> lod_limits_;
 	/// Duration for a transition between two lods.
-	float transition_time_ = 0.75f;
+	float transition_time_{0.75f};
 };

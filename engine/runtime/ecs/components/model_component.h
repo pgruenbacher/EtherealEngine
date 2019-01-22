@@ -115,11 +115,11 @@ private:
 	// Private Member Variables.
 	//-------------------------------------------------------------------------
 	///
-	bool static_ = true;
+	bool static_{true};
 	///
-	bool casts_shadow_ = true;
+	bool casts_shadow_{true};
 	///
-	bool casts_reflection_ = true;
+	bool casts_reflection_{true};
 	///
 	model model_;
 	///

@@ -19,14 +19,14 @@ void initialize_protocols() {
 }
 
 TEST(App, DefaultScene) {
-  return;
+  // return;
   initialize_protocols();
 
   editor::app edit;
 
   edit.setup_testing();
-
   edit.create_new_scene();
+  edit.run_one_frame();
 
   edit.stop();
   core::details::dispose();

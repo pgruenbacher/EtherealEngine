@@ -102,7 +102,7 @@ struct editing_system
 	void close_project();
 
 	/// editor camera
-	EntityType camera;
+	EntityType camera{entt::null};
 	/// current scene
 	std::string scene;
 	/// enable editor grid

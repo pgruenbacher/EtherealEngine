@@ -5,6 +5,7 @@
 
 #include <runtime/ecs/components/transform_component.h>
 #include <runtime/ecs/components/camera_component.h>
+#include <runtime/ecs/components/light_component.h>
 
 template<typename C>
 void try_inspect_component(const Registry& ecs, EntityType ent, bool& changed) {

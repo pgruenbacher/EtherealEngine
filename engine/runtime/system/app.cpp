@@ -74,6 +74,9 @@ void app::start(cmd_line::parser& parser)
 
 void app::stop()
 {
+	// reset before the dispose
+	// cause I was getting a seg fault error before...
+	core::get_subsystem<SpatialSystem>().reset();
 }
 
 void poll_events()

@@ -2,6 +2,7 @@
 
 #include "editor_runtime/system/app.h"
 #include <core/filesystem/filesystem.h>
+#include <runtime/ecs/ent.h>
 
 void initialize_protocols() {
 
@@ -26,7 +27,9 @@ TEST(App, DefaultScene) {
 
   edit.setup_testing();
   edit.create_new_scene();
-  edit.run_one_frame();
+  // auto& ecs = core::get_subsystem<SpatialSystem>();
+  // ecs.reset();
+  // edit.run_one_frame();
 
   edit.stop();
   core::details::dispose();

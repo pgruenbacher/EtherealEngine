@@ -92,20 +92,20 @@ TEST(Serialize, Utils) {
     ecs.assign<transform_component>(ent);
   }
 
-  // {
-  //   auto ent = factory.create();
-  //   ecs.assign<reflection_probe_component>(ent);
-  // }
+  {
+    auto ent = factory.create();
+    ecs.assign<reflection_probe_component>(ent);
+  }
 
-  // {
-  //   auto ent = factory.create();
-  //   ecs.assign<light_component>(ent);
-  // }
+  {
+    auto ent = factory.create();
+    ecs.assign<light_component>(ent);
+  }
 
-  // {
-  //   auto ent = factory.create();
-  //   ecs.assign<light_component>(ent);
-  // }
+  {
+    auto ent = factory.create();
+    ecs.assign<light_component>(ent);
+  }
 
   std::vector<EntityType> ents;
   ecs.each([&ents](EntityType e) { ents.push_back(e); });

@@ -30,4 +30,4 @@
 	url = https://github.com/kcat/openal-soft.git
 [submodule "3rdparty/entt"]
 	path = 3rdparty/entt
-	url = https://github.com/skypjack/entt
+	url = https://github.com/pgruenbacher/entt

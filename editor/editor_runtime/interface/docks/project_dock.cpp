@@ -18,7 +18,7 @@
 #include <runtime/ecs/constructs/utils.h>
 #include <runtime/ecs/ent.h>
 #include <runtime/rendering/material.h>
-#include <runtime/rendering/mesh.h>
+#include <runtime/rendering/mesh/mesh.h>
 
 #include <editor_core/nativefd/filedialog.h>
 

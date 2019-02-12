@@ -13,7 +13,7 @@
 #include <runtime/input/input.h>
 #include <runtime/rendering/camera.h>
 #include <runtime/rendering/material.h>
-#include <runtime/rendering/mesh.h>
+#include <runtime/rendering/mesh/mesh.h>
 #include <runtime/rendering/model.h>
 #include <runtime/rendering/render_window.h>
 #include <runtime/rendering/renderer.h>

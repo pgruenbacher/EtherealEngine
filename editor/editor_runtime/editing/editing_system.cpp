@@ -10,7 +10,7 @@
 #include <runtime/ecs/components/relation.h>
 #include <runtime/ecs/constructs/utils.h>
 #include <runtime/rendering/material.h>
-#include <runtime/rendering/mesh.h>
+#include <runtime/rendering/mesh/mesh.h>
 #include <runtime/rendering/render_window.h>
 #include <runtime/system/events.h>
 

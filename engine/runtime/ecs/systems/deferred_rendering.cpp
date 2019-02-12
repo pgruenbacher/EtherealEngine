@@ -2,7 +2,7 @@
 #include "../../assets/asset_manager.h"
 #include "../../rendering/camera.h"
 #include "../../rendering/material.h"
-#include "../../rendering/mesh.h"
+#include "../../rendering/mesh/mesh.h"
 #include "../../rendering/model.h"
 #include "../../rendering/renderer.h"
 #include "../../system/events.h"

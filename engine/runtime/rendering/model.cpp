@@ -1,7 +1,7 @@
 #include "model.h"
 #include "gpu_program.h"
 #include "material.h"
-#include "mesh.h"
+#include "runtime/rendering/mesh/mesh.h"
 
 #include "../assets/asset_manager.h"
 

@@ -7,7 +7,7 @@
 #include "../ecs/constructs/prefab.h"
 #include "../ecs/constructs/scene.h"
 #include "../rendering/material.h"
-#include "../rendering/mesh.h"
+#include "../rendering/mesh/mesh.h"
 
 #include <core/audio/sound.h>
 #include <core/graphics/shader.h>

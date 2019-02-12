@@ -14,7 +14,7 @@
 #include <runtime/assets/impl/asset_writer.h>
 #include <runtime/ecs/constructs/prefab.h>
 #include <runtime/rendering/material.h>
-#include <runtime/rendering/mesh.h>
+#include <runtime/rendering/mesh/mesh.h>
 
 template <typename asset_t>
 static bool process_drag_drop_target(asset_handle<asset_t>& entry)

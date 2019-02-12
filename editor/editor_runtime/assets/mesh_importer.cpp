@@ -4,7 +4,7 @@
 #include <core/logging/logging.h>
 #include <core/math/math_includes.h>
 
-#include <runtime/rendering/mesh.h>
+#include <runtime/rendering/mesh/mesh.h>
 
 #include <editor_core/mesh_import/mesh_import.h>
 

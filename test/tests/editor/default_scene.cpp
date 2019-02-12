@@ -19,10 +19,14 @@ void initialize_protocols() {
 
 }
 
-TEST(App, DefaultScene) {
-  // return;
-  initialize_protocols();
+class AppTest : public ::testing::Test {
+  void SetUp() override {
+    initialize_protocols();
+  }
+};
 
+TEST_F(AppTest, DefaultScene) {
+  // return;
   editor::app edit;
 
   edit.setup_testing();

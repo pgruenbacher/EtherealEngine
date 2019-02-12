@@ -1,6 +1,6 @@
 #pragma once
 #include <runtime/animation/animation.h>
-#include <runtime/rendering/mesh.h>
+#include <runtime/rendering/mesh/mesh.h>
 
 namespace importer
 {

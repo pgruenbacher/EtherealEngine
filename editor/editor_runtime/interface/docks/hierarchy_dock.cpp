@@ -20,7 +20,7 @@
 #include <runtime/ecs/constructs/utils.h>
 #include <runtime/ecs/systems/scene_graph.h>
 #include <runtime/input/input.h>
-#include <runtime/rendering/mesh.h>
+#include <runtime/rendering/mesh/mesh.h>
 
 namespace
 {

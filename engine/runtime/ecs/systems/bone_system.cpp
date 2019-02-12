@@ -1,5 +1,5 @@
 #include "bone_system.h"
-#include "../../rendering/mesh.h"
+#include "../../rendering/mesh/mesh.h"
 #include "../../system/events.h"
 #include "../components/model_component.h"
 #include "../components/transform_component.h"

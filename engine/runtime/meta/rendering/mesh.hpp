@@ -1,5 +1,5 @@
 #pragma once
-#include "../../rendering/mesh.h"
+#include "../../rendering/mesh/mesh.h"
 
 #include <core/reflection/reflection.h>
 #include <core/serialization/serialization.h>

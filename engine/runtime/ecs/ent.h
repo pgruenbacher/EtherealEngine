@@ -5,9 +5,9 @@
 #include <core/reflection/registration.h>
 #include <core/common/nonstd/type_index.hpp>
 
-using EntityType = entt::registry<>::entity_type;
-using ActorType = entt::actor<EntityType>;
-using Registry = entt::registry<>;
+using EntityType = entt::registry::entity_type;
+using ActorType = entt::actor;
+using Registry = entt::registry;
 using SpatialSystem = Registry;
 
 namespace ecs {

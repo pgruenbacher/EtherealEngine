@@ -95,7 +95,7 @@ bool deserialize_data(std::istream& stream, std::vector<EntityType>& out_data)
 }
 
 
-entt::prototype<EntityType> get_default_ent_factory(Registry& reg) {
+entt::prototype get_default_ent_factory(Registry& reg) {
   entt::prototype proto{reg};
   proto.set<Name>();
   proto.set<Relation>();

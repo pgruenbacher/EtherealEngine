@@ -12,8 +12,8 @@ struct timer {
 };
 
 struct relationship {
-    entt::registry<>::entity_type parent;
-    entt::registry<>::entity_type global_id;
+    entt::registry::entity_type parent;
+    entt::registry::entity_type global_id;
 };
 
 struct position {

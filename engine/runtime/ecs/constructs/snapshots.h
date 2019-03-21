@@ -101,7 +101,7 @@ public:
 
 private:
     cereal::iarchive_associative_t& _storage;
-    entt::snapshot_loader<EntityType> _loader;
+    entt::snapshot_loader _loader;
 };
 
 /*----------  Continuous Archive  ----------*/
@@ -138,7 +138,7 @@ public:
 
 private:
     cereal::iarchive_associative_t& _storage;
-    entt::continuous_loader<EntityType> _loader;
+    entt::continuous_loader _loader;
 };
 
 

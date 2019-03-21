@@ -55,8 +55,8 @@ TEST(Serialize, Basic) {
 
     std::stringstream storage;
 
-    entt::registry<> source;
-    entt::registry<> destination;
+    entt::registry source;
+    entt::registry destination;
 
     auto e0 = source.create();
     source.assign<position>(e0);
@@ -98,8 +98,8 @@ TEST(Serialize, Continuous) {
 
     std::stringstream storage;
 
-    entt::registry<> source;
-    entt::registry<> destination;
+    entt::registry source;
+    entt::registry destination;
 
 
     auto e0 = source.create();
